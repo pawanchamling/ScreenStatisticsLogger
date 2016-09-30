@@ -1,0 +1,15 @@
+<resources>
+    <string name="app_name">Screen Statistics Logger</string>
+
+    <string name="txt_start_recording">Start Recording</string>
+    <string name="txt_last_screen_off">Screen was last turned off at</string>
+    <string name="txt_last_screen_timestamp">[last_screen_off_timestamp]</string>
+
+    <string name="txt_time_between_screen_on_and_off">[time-diff]</string>
+    <string name="txt_stop_recording">Stop Recording</string>
+
+    <string name="txt_see_graph">See Graph</string>
+    <string name="txt_settings">Settings</string>
+
+
+</resources>
