@@ -2,14 +2,29 @@
     <string name="app_name">Screen Statistics Logger</string>
 
     <string name="txt_start_recording">Start Recording</string>
-    <string name="txt_last_screen_off">Screen was last turned off at</string>
-    <string name="txt_last_screen_timestamp">[last_screen_off_timestamp]</string>
-
-    <string name="txt_time_between_screen_on_and_off">[time-diff]</string>
     <string name="txt_stop_recording">Stop Recording</string>
+
+    <string name="txt_last_screen_OFF_at">Screen was last turned off at</string>
+    <string name="txt_last_screen_OFF_timestamp">[last_screen_off_timestamp]</string>
+    <string name="txt_last_screen_OFF_for">[time-diff]</string>
 
     <string name="txt_see_graph">See Graph</string>
     <string name="txt_settings">Settings</string>
+
+    <string name="txt_last_screen_ON_at">Last Screen ON at</string>
+    <string name="txt_last_screen_ON_at_timestamp">[last_screen_ON_timestamp]</string>
+    <string name="txt_last_screen_ON_for">[last_screen_ON_timestamp]</string>
+
+    <string name="txt_screen_is_ON_for">Screen is ON for</string>
+    <string name="txt_screen_is_ON_for_timestamp">[screen_time]</string>
+    <string name="txt_today">Today</string>
+
+    <string name="txt_screen_ON_for_X_times_today">[X times]</string>
+    <string name="txt_total_screen_ON_time_today">[Screen_ON_time]</string>
+    <string name="txt_total_screen_OFF_time_today">[Screen_OFF_time]</string>
+
+    <string name="txt_show_all_logged_data">Show all logged data</string>
+    <string name="txt_show_all_smart_sleep_logs">Show all Smart Sleep Logs</string>
 
 
 </resources>

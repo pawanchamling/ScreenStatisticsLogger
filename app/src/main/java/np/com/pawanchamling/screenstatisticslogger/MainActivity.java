@@ -88,13 +88,13 @@ public class MainActivity extends AppCompatActivity {
 
         writeToDB();
 
-        // Hiding the 'Start recording' button
-        Button btn_startRecording = (Button) findViewById(R.id.button_start_recording);
-        btn_startRecording.setVisibility(View.INVISIBLE);
-
-        //Showing other buttons and textView components
-        Button btn_stopRecording = (Button) findViewById(R.id.button_stop_recording);
-        btn_stopRecording.setVisibility(View.VISIBLE);
+//        // Hiding the 'Start recording' button
+//        Button btn_startRecording = (Button) findViewById(R.id.button_start_recording);
+//        btn_startRecording.setVisibility(View.INVISIBLE);
+//
+//        //Showing other buttons and textView components
+//        Button btn_stopRecording = (Button) findViewById(R.id.button_stop_recording);
+//        btn_stopRecording.setVisibility(View.VISIBLE);
 //
 //        Button btn_setting = (Button) findViewById(R.id.button_settings);
 //        btn_setting.setVisibility(View.VISIBLE);
@@ -115,12 +115,12 @@ public class MainActivity extends AppCompatActivity {
 
     public void stopRecording(View v) {
         // Showing the 'Start recording' button
-        Button btn_startRecording = (Button) findViewById(R.id.button_start_recording);
-        btn_startRecording.setVisibility(View.VISIBLE);
-
-        //Hiding other buttons and textView components
-        Button btn_stopRecording = (Button) findViewById(R.id.button_stop_recording);
-        btn_stopRecording.setVisibility(View.INVISIBLE);
+//        Button btn_startRecording = (Button) findViewById(R.id.button_start_recording);
+//        btn_startRecording.setVisibility(View.VISIBLE);
+//
+//        //Hiding other buttons and textView components
+//        Button btn_stopRecording = (Button) findViewById(R.id.button_stop_recording);
+//        btn_stopRecording.setVisibility(View.INVISIBLE);
 //
 //        Button btn_setting = (Button) findViewById(R.id.button_settings);
 //        btn_setting.setVisibility(View.INVISIBLE);
