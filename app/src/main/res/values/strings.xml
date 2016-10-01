@@ -19,9 +19,14 @@
     <string name="txt_screen_is_ON_for_timestamp">[screen_time]</string>
     <string name="txt_today">Today</string>
 
-    <string name="txt_screen_ON_for_X_times_today">[X times]</string>
-    <string name="txt_total_screen_ON_time_today">[Screen_ON_time]</string>
-    <string name="txt_total_screen_OFF_time_today">[Screen_OFF_time]</string>
+    <string name="txt_screen_ON_for_X_times_today">Screen turned ON for</string>
+    <string name="txt_screen_ON_for_X_times_today_count">[X times]</string>
+    <string name="txt_times">times</string>
+
+    <string name="txt_total_screen_ON_time_today">Total Screen ON for</string>
+    <string name="txt_total_screen_OFF_time_today">Total Screen OFF for</string>
+    <string name="txt_total_screen_ON_time_today_value">[Screen_ON_time]</string>
+    <string name="txt_total_screen_OFF_time_today_value">[Screen_OFF_time]</string>
 
     <string name="txt_show_all_logged_data">Show all logged data</string>
     <string name="txt_show_all_smart_sleep_logs">Show all Smart Sleep Logs</string>
