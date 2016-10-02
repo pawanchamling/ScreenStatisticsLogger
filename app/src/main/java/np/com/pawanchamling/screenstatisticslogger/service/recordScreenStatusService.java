@@ -18,10 +18,12 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
+import np.com.pawanchamling.screenstatisticslogger.MainActivity;
 import np.com.pawanchamling.screenstatisticslogger.ScreenReceiver;
 import np.com.pawanchamling.screenstatisticslogger.db.MySQLiteHelper;
 import np.com.pawanchamling.screenstatisticslogger.db.ScreenStatisticsDatabaseContract;
 import np.com.pawanchamling.screenstatisticslogger.model.Settings;
+import np.com.pawanchamling.screenstatisticslogger.utility.BasicHelper;
 
 /**
  * Created by Pawan Chamling on 2016-09-24.
@@ -33,6 +35,8 @@ public class recordScreenStatusService extends Service {
     public SQLiteDatabase db;
 
     public LocalBroadcastManager localBroadcastManager;
+    public BasicHelper basicHelper;
+
 
     @Nullable
     @Override
@@ -46,7 +50,7 @@ public class recordScreenStatusService extends Service {
        // System.out.println("recordScreenStatusService : Service recordScreenStatusService created");
         Log.d("ScreenStatusService", "onCreate: Service recordScreenStatusService created");
 
-
+        basicHelper = new BasicHelper();
 
         // REGISTER RECEIVER THAT HANDLES SCREEN ON AND SCREEN OFF LOGIC
         Log.d("ScreenStatusService", "registering receiver that handles screen on and off logic");
@@ -77,21 +81,21 @@ public class recordScreenStatusService extends Service {
         if(id != null) {
             settingsAndStatus = (Settings)id.getSerializable("settingsAndStatus");
 
-            Log.d("ScreenStatusService", "Settings received ");
+            Log.d("ScreenStatusService", "onStartCommand : Settings received ");
         }
 
 
-        Log.d("ScreenStatusService", "onStartCommand: ");
+        Log.d("ScreenStatusService", "onStartCommand : ");
 
 
         boolean screenOff = intent.getBooleanExtra("screen_state", false);
         if (!screenOff) {
-            Log.d("ScreenStatusService", "Screen is ON");
+            Log.d("ScreenStatusService", "onStartCommand : Screen is ON");
 
             saveStateChangeInfo(true);
 
         } else {
-            Log.d("ScreenStatusService", "Screen is OFF");
+            Log.d("ScreenStatusService", "onStartCommand : Screen is OFF");
 
             saveStateChangeInfo(false);
         }
@@ -139,8 +143,12 @@ public class recordScreenStatusService extends Service {
 
         //-- Screen is ON
         if(screenIsOn) {
+            screenStatusIs = "ON";
+            Log.d("ScreenStatusService", "saveStateChangeInfo : Screen status ON");
+
+
             lastTimestamp = settingsAndStatus.getLastScreenOffTimestamp();
-            if(lastTimestamp.equals("--|--")) {
+            if(lastTimestamp == null || lastTimestamp.equals("--|--")) {
                 diffTime = 0;
             }
             else {
@@ -159,8 +167,6 @@ public class recordScreenStatusService extends Service {
                 diffTime = timestampInMilliseconds - lastTimestampInMilliseconds;
             }
 
-            screenStatusIs = "ON";
-            Log.d("ScreenStatusService", "saveStateChangeInfo : Screen status ON");
 
             settingsAndStatus.setLastScreenOnTimestamp(settingsAndStatus.getLastEventTimestamp());
             settingsAndStatus.setLastScreenOffTimestamp(settingsAndStatus.getCurrentEventTimestamp());
@@ -176,12 +182,31 @@ public class recordScreenStatusService extends Service {
             else {
                 Log.d("ScreenStatusService", "saveStateChangeInfo : Count value was null");
             }
+
+
+
+            if(basicHelper.isScreenOnInANewDay(settingsAndStatus.getCurrentEventTimestamp(), settingsAndStatus.getEarlierEventTimestamp())) {
+                Log.d("ScreenStatusService", "saveStateChangeInfo : TotalScreenOffTimeToday was = " + settingsAndStatus.getTotalScreenOffTimeToday());
+                settingsAndStatus.setTotalScreenOffTimeToday(settingsAndStatus.getTotalScreenOffTimeToday() + diffTime);
+            }
+            else {
+                Log.d("ScreenStatusService", "saveStateChangeInfo : TotalScreenOffTimeToday => New day count is reset to 0");
+                settingsAndStatus.setTotalScreenOffTimeToday(diffTime);
+            }
+
+            statusValues.put(ScreenStatisticsDatabaseContract.Table_SettingsAndStatus.COLUMN_SCREEN_OFF_TIME_LENGTH_TODAY, settingsAndStatus.getTotalScreenOffTimeToday() );
+
+
+
         }
         else {
+            screenStatusIs = "OFF";
+            Log.d("ScreenStatusService", "saveStateChangeInfo : Screen status OFF");
+
             lastTimestamp = settingsAndStatus.getLastScreenOnTimestamp();
             Log.d("ScreenStatusService", "saveStateChangeInfo : lastTimestamp = " + lastTimestamp);
 
-            if(lastTimestamp.equals("--|--") || lastTimestamp == null) {
+            if(lastTimestamp == null || lastTimestamp.equals("--|--")) {
                 diffTime = 0;
             }
             else {
@@ -200,8 +225,6 @@ public class recordScreenStatusService extends Service {
                 diffTime = timestampInMilliseconds - lastTimestampInMilliseconds;
             }
 
-            screenStatusIs = "OFF";
-            Log.d("ScreenStatusService", "saveStateChangeInfo : Screen status OFF");
 
             settingsAndStatus.setLastScreenOffTimestamp(settingsAndStatus.getLastEventTimestamp());
             settingsAndStatus.setLastScreenOnTimestamp(settingsAndStatus.getCurrentEventTimestamp());
@@ -209,6 +232,18 @@ public class recordScreenStatusService extends Service {
 
             statusValues.put(ScreenStatisticsDatabaseContract.Table_SettingsAndStatus.COLUMN_LAST_SCREEN_OFF_TIMESTAMP, newCurrentTimestamp);
             statusValues.put(ScreenStatisticsDatabaseContract.Table_SettingsAndStatus.COLUMN_LAST_TOTAL_SCREEN_ON_TIME, diffTime);
+
+
+            if(basicHelper.isScreenOnInANewDay(settingsAndStatus.getCurrentEventTimestamp(), settingsAndStatus.getEarlierEventTimestamp())) {
+                Log.d("ScreenStatusService", "saveStateChangeInfo : TotalScreenOnTimeToday was = " + settingsAndStatus.getTotalScreenOnTimeToday());
+                settingsAndStatus.setTotalScreenOnTimeToday(settingsAndStatus.getTotalScreenOnTimeToday() + diffTime);
+            }
+            else {
+                Log.d("ScreenStatusService", "saveStateChangeInfo : TotalScreenOnTimeToday => New day count is reset to 0");
+                settingsAndStatus.setTotalScreenOnTimeToday(diffTime);
+            }
+
+            statusValues.put(ScreenStatisticsDatabaseContract.Table_SettingsAndStatus.COLUMN_SCREEN_ON_TIME_LENGTH_TODAY, settingsAndStatus.getTotalScreenOnTimeToday() );
         }
 
 

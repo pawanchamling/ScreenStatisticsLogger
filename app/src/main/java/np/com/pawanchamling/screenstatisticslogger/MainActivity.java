@@ -26,6 +26,7 @@ import np.com.pawanchamling.screenstatisticslogger.db.MySQLiteHelper;
 import np.com.pawanchamling.screenstatisticslogger.db.ScreenStatisticsDatabaseContract;
 import np.com.pawanchamling.screenstatisticslogger.model.Settings;
 import np.com.pawanchamling.screenstatisticslogger.service.recordScreenStatusService;
+import np.com.pawanchamling.screenstatisticslogger.utility.BasicHelper;
 
 public class MainActivity extends AppCompatActivity {
     public MySQLiteHelper mDbHelper;
@@ -34,6 +35,8 @@ public class MainActivity extends AppCompatActivity {
     private BroadcastReceiver broadcastReceiver;
 
     public Chronometer screenONtimer;
+
+    public BasicHelper basicHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,6 +48,8 @@ public class MainActivity extends AppCompatActivity {
 
         //
         settingsAndStatus = new Settings();
+
+        basicHelper = new BasicHelper();
 
         //-- Creating a new database helper
         Log.d("MainActivity", "onCreate: Instantiating MySQLiteHelper");
@@ -291,27 +296,27 @@ public class MainActivity extends AppCompatActivity {
         //-- Screen was last turned OFF at [timestamp]
         String lastScreenOffTimestamp = settingsAndStatus.getLastScreenOffTimestamp();
         TextView textView_last_screen_off_timestamp = (TextView) findViewById(R.id.textView_last_screen_OFF_at_timestamp);
-        textView_last_screen_off_timestamp.setText(getCleanerTimestamp(lastScreenOffTimestamp));
+        textView_last_screen_off_timestamp.setText(basicHelper.getCleanerTimestamp(lastScreenOffTimestamp, true));
 
         //-- Screen was OFF for [total_OFF_time]
         long diffTotalTimeScreenWasOff = settingsAndStatus.getTotalTimeScreenWasOff();
-        String diffTotalTimeScreenWasOffStr = getVerboseTime(diffTotalTimeScreenWasOff) + " ago";
+        String diffTotalTimeScreenWasOffStr = basicHelper.getVerboseTime(diffTotalTimeScreenWasOff, false) + " ago";
         TextView textView_time_between_screen_on_and_off = (TextView) findViewById(R.id.textView_last_screen_OFF_for);
         textView_time_between_screen_on_and_off.setText(diffTotalTimeScreenWasOffStr);
 
 
         String lastScreenOnTimestamp = settingsAndStatus.getEarlierEventTimestamp();
         TextView textView_last_screen_on_timestamp = (TextView) findViewById(R.id.textView_last_screen_ON_at_timestamp);
-        textView_last_screen_on_timestamp.setText(getCleanerTimestamp(lastScreenOnTimestamp));
+        textView_last_screen_on_timestamp.setText(basicHelper.getCleanerTimestamp(lastScreenOnTimestamp, true));
 
 
         //-- Screen was ON for [total_ON_time]
         long diffTotalTimeScreenWasOn = settingsAndStatus.getTotalTimeScreenWasOn();
-        String diffTotalTimeScreenWasOnStr = "for " + getVerboseTime(diffTotalTimeScreenWasOn);
+        String diffTotalTimeScreenWasOnStr = "for " + basicHelper.getVerboseTime(diffTotalTimeScreenWasOn, false);
         TextView textView_time_between_screen_off_and_on = (TextView) findViewById(R.id.textView_last_screen_ON_for);
         textView_time_between_screen_off_and_on.setText(diffTotalTimeScreenWasOnStr);
 
-        if(isScreenOnInANewDay(settingsAndStatus.getCurrentEventTimestamp(), settingsAndStatus.getEarlierEventTimestamp())) {
+        if(basicHelper.isScreenOnInANewDay(settingsAndStatus.getCurrentEventTimestamp(), settingsAndStatus.getEarlierEventTimestamp())) {
             Log.d("MainActivity", "updateScreenInfo : TotalScreenOnCountToday  was = " + settingsAndStatus.getTotalScreenOnCountToday());
             settingsAndStatus.setTotalScreenOnCountToday(settingsAndStatus.getTotalScreenOnCountToday() + 1);
 
@@ -327,107 +332,14 @@ public class MainActivity extends AppCompatActivity {
         textView_screen_ON_for_X_times_today_count.setText(settingsAndStatus.getTotalScreenOnCountToday() + "");
 
 
-    }
 
-    public boolean isScreenOnInANewDay(String currentTimestamp, String lastTimestamp) {
-        boolean flag = false;
-        if(currentTimestamp != null && lastTimestamp != null) {
-            Log.d("MainActivity", "isScreenOnInANewDay : currentTimestamp  = " + currentTimestamp);
-            Log.d("MainActivity", "isScreenOnInANewDay : lastTimestamp  = " + lastTimestamp);
-
-            SimpleDateFormat dateFormat0 = new SimpleDateFormat("EE MMM dd HH:mm:ss z yyyy", Locale.ENGLISH);
-            try {
-                //currentTimestamp = "Sun Oct 01 15:33:53 GMT+02:00 2016";
-
-                Date date1 = dateFormat0.parse(currentTimestamp);
-                Calendar c0 = Calendar.getInstance();
-                c0.setTime(date1);
-                int currentDay = c0.get(c0.DAY_OF_MONTH);
-
-                Date date2 = dateFormat0.parse(lastTimestamp);
-                Calendar c1 = Calendar.getInstance();
-                c1.setTime(date2);
-                int lastDay = c1.get(c1.DAY_OF_MONTH);
-
-                Log.d("isScreenOnInANewDay", "current : day of the month " + currentDay );
-                Log.d("isScreenOnInANewDay", "last    : day of the month " + lastDay );
-
-                if(currentDay == lastDay) {
-                    flag = true;
-                    Log.d("isScreenOnInANewDay", "Screen is turned ON on the same day" );
-                }
-                else {
-                    Log.d("isScreenOnInANewDay", "Screen is turned ON on the other day" );
-                }
-
-            }
-            catch(ParseException e) {
-                e.printStackTrace();
-            }
-
-        }
-        else {
-            Log.d("isScreenOnInANewDay", "currentTimestamp or lastTimestamp is null" );
-        }
+        TextView textView_total_screen_ON_time_today_value = (TextView) findViewById(R.id.textView_total_screen_ON_time_today_value);
+        textView_total_screen_ON_time_today_value.setText(basicHelper.getVerboseTime(settingsAndStatus.getTotalScreenOnTimeToday(), true));
 
 
-        return flag;
 
-    }
-
-    public String getCleanerTimestamp(String timestamp) {
-
-        Log.d("MainActivity", "cleaner Timestamp for  = " + timestamp);
-        String cleanTimestamp = "--|--";
-
-        if(timestamp != null && !timestamp.equals("--|--") ) {
-            SimpleDateFormat dateFormat0 = new SimpleDateFormat("EE MMM dd HH:mm:ss z yyyy", Locale.ENGLISH);
-            SimpleDateFormat dateFormat1 = new SimpleDateFormat("HH:mm:ss");
-            SimpleDateFormat dateFormat2 = new SimpleDateFormat("yyyy-MM-dd");
-            try {
-
-                Date d0 = dateFormat0.parse(timestamp);
-
-                cleanTimestamp = dateFormat1.format(d0) + " (" + dateFormat2.format(d0) + ")";
-
-            } catch (ParseException e) {
-                e.printStackTrace();
-
-            }
-        }
-
-        return cleanTimestamp;
-    }
-
-    public String getVerboseTime(long diffTime) {
-        String diffTimeStr = "";
-
-        if(diffTime < 60000) {
-            //-- less than minute
-            diffTimeStr = (diffTime / 1000)  + " seconds";
-        }
-        else if(diffTime >= 60000 && diffTime < 120000 ){
-
-            long seconds = diffTime % 60000;
-            diffTimeStr = (diffTime/60000) + " minute & " + seconds/1000 + " seconds";
-        }
-        else if(diffTime >= 120000 && diffTime < 3600000){
-            long seconds = diffTime % 60000;
-            diffTimeStr = (diffTime/60000) + " minutes & "+ seconds/1000 + " seconds";
-        }
-        else if(diffTime >= 3600000 && diffTime < 7200000){
-            long seconds = diffTime % 60000;
-            long minutes = diffTime % 3600000;
-            diffTimeStr = (diffTime/3600000) + " hour & "+ minutes/60000 + " minutes";
-        }
-        else {
-            long minutes = diffTime % 3600000;
-            diffTimeStr = (diffTime/3600000) + " hours & "+ minutes/60000 + " minutes";
-        }
-
-        Log.d("MainActivity", "getVerboseTime: diffTime = " + diffTime + " -> " + diffTimeStr);
-
-        return diffTimeStr;
+        TextView textView_total_screen_OFF_time_today_value = (TextView) findViewById(R.id.textView_total_screen_OFF_time_today_value);
+        textView_total_screen_OFF_time_today_value.setText(basicHelper.getVerboseTime(settingsAndStatus.getTotalScreenOffTimeToday(), true));
     }
 
 
