@@ -112,7 +112,8 @@ public class recordScreenStatusService extends Service {
 
 
         String screenStatusIs = "";
-        String currentTimeStamp = "";
+        String newCurrentTimestamp = "";
+        String currentTimestamp = "";
 
         Long timestampLong = System.currentTimeMillis()/1000;
         String ts = timestampLong.toString();
@@ -121,21 +122,20 @@ public class recordScreenStatusService extends Service {
 
         Calendar c = Calendar.getInstance();
         Calendar c2 = Calendar.getInstance();
-        currentTimeStamp = c.getTime().toString();
+        newCurrentTimestamp = c.getTime().toString();
 
         long timestampInMilliseconds = c.getTimeInMillis();
 
 
         String dateIs = (DateFormat.format("dd-MM-yyyy hh:mm:ss", new java.util.Date()).toString());
 
-        Log.d("ScreenStatusService", "current timestamp  = " + currentTimeStamp);
-        Log.d("ScreenStatusService", "current timestamp in millis = " + timestampInMilliseconds);
+        Log.d("ScreenStatusService", "saveStateChangeInfo : New current timestamp  = " + newCurrentTimestamp);
+        Log.d("ScreenStatusService", "saveStateChangeInfo : New current timestamp in millis = " + timestampInMilliseconds);
         c2.setTimeInMillis(timestampInMilliseconds);
         //Log.d("ScreenStatusService", "timestamp and back = " + c2.getTime());
 
 
         ContentValues statusValues = new ContentValues();
-
 
         //-- Screen is ON
         if(screenIsOn) {
@@ -160,17 +160,28 @@ public class recordScreenStatusService extends Service {
             }
 
             screenStatusIs = "ON";
-            Log.d("ScreenStatusService", "Screen status ON");
+            Log.d("ScreenStatusService", "saveStateChangeInfo : Screen status ON");
 
-            settingsAndStatus.setLastScreenOnTimestamp(currentTimeStamp);
-            settingsAndStatus.setTotalTimeScreenWasOff(diffTime );
+            settingsAndStatus.setLastScreenOnTimestamp(settingsAndStatus.getLastEventTimestamp());
+            settingsAndStatus.setLastScreenOffTimestamp(settingsAndStatus.getCurrentEventTimestamp());
+            settingsAndStatus.setTotalTimeScreenWasOff(diffTime);
 
-            statusValues.put(ScreenStatisticsDatabaseContract.Table_SettingsAndStatus.COLUMN_LAST_SCREEN_ON_TIMESTAMP, currentTimeStamp);
+            statusValues.put(ScreenStatisticsDatabaseContract.Table_SettingsAndStatus.COLUMN_LAST_SCREEN_ON_TIMESTAMP, newCurrentTimestamp);
             statusValues.put(ScreenStatisticsDatabaseContract.Table_SettingsAndStatus.COLUMN_LAST_TOTAL_SCREEN_OFF_TIME, diffTime);
+
+            Long  totalCount = settingsAndStatus.getTotalScreenOnCountToday();
+            if(totalCount != null) {
+                statusValues.put(ScreenStatisticsDatabaseContract.Table_SettingsAndStatus.COLUMN_SCREEN_ON_COUNT_TODAY, settingsAndStatus.getTotalScreenOnCountToday());
+            }
+            else {
+                Log.d("ScreenStatusService", "saveStateChangeInfo : Count value was null");
+            }
         }
         else {
             lastTimestamp = settingsAndStatus.getLastScreenOnTimestamp();
-            if(lastTimestamp.equals("--|--")) {
+            Log.d("ScreenStatusService", "saveStateChangeInfo : lastTimestamp = " + lastTimestamp);
+
+            if(lastTimestamp.equals("--|--") || lastTimestamp == null) {
                 diffTime = 0;
             }
             else {
@@ -190,40 +201,53 @@ public class recordScreenStatusService extends Service {
             }
 
             screenStatusIs = "OFF";
-            Log.d("ScreenStatusService", "Screen status OFF");
+            Log.d("ScreenStatusService", "saveStateChangeInfo : Screen status OFF");
 
-            settingsAndStatus.setLastScreenOffTimestamp(currentTimeStamp);
+            settingsAndStatus.setLastScreenOffTimestamp(settingsAndStatus.getLastEventTimestamp());
+            settingsAndStatus.setLastScreenOnTimestamp(settingsAndStatus.getCurrentEventTimestamp());
             settingsAndStatus.setTotalTimeScreenWasOn(diffTime);
 
-            statusValues.put(ScreenStatisticsDatabaseContract.Table_SettingsAndStatus.COLUMN_LAST_SCREEN_OFF_TIMESTAMP, currentTimeStamp);
+            statusValues.put(ScreenStatisticsDatabaseContract.Table_SettingsAndStatus.COLUMN_LAST_SCREEN_OFF_TIMESTAMP, newCurrentTimestamp);
             statusValues.put(ScreenStatisticsDatabaseContract.Table_SettingsAndStatus.COLUMN_LAST_TOTAL_SCREEN_ON_TIME, diffTime);
         }
 
 
-        Log.d("ScreenStatusService", "diff = " + diffTime);
+        Log.d("ScreenStatusService", "saveStateChangeInfo : current timestamp  = " + settingsAndStatus.getCurrentEventTimestamp());
+        Log.d("ScreenStatusService", "saveStateChangeInfo : last timestamp  = " + settingsAndStatus.getLastEventTimestamp());
+        Log.d("ScreenStatusService", "saveStateChangeInfo : new timestamp  = " + newCurrentTimestamp);
+
+
+        settingsAndStatus.setEarlierEventTimestamp(settingsAndStatus.getLastEventTimestamp());
+        settingsAndStatus.setLastEventTimestamp(settingsAndStatus.getCurrentEventTimestamp());
+        settingsAndStatus.setCurrentEventTimestamp(newCurrentTimestamp);
+
+
+        Log.d("ScreenStatusService", "saveStateChangeInfo : diff = " + diffTime);
 
         if(diffTime < 60000) {
             //-- less than minute
-            Log.d("ScreenStatusService", "diff = " + (diffTime / 1000) + " seconds" );
+            Log.d("ScreenStatusService", "saveStateChangeInfo : diff = " + (diffTime / 1000) + " seconds" );
         }
         else {
-            Log.d("ScreenStatusService", "diff = " + (diffTime/60000) + " minutes");
+            Log.d("ScreenStatusService", "saveStateChangeInfo : diff = " + (diffTime / 60000) + " minutes");
         }
 
 
         // Create a new map of values, where column names are the keys
         ContentValues values = new ContentValues();
-        values.put(ScreenStatisticsDatabaseContract.Table_ScreenStats.COLUMN_NAME_TIMESTAMP, currentTimeStamp);
+        values.put(ScreenStatisticsDatabaseContract.Table_ScreenStats.COLUMN_NAME_TIMESTAMP, newCurrentTimestamp);
         values.put(ScreenStatisticsDatabaseContract.Table_ScreenStats.COLUMN_NAME_SCREEN_STATUS, screenStatusIs);
         values.put(ScreenStatisticsDatabaseContract.Table_ScreenStats.COLUMN_NAME_DIFF_TIME, diffTime);
 
 
         //-- Insert the new row, returning the primary key value of the new row
         long newRowId = db.insert(ScreenStatisticsDatabaseContract.Table_ScreenStats.TABLE_NAME, null, values);
-        Log.d("ScreenStatusService", "row inserted: " + newRowId);
+        Log.d("ScreenStatusService", "saveStateChangeInfo : row inserted: " + newRowId);
+
+
 
         int updatedRow = db.update(ScreenStatisticsDatabaseContract.Table_SettingsAndStatus.TABLE_NAME, statusValues, "_id=1", null);
-        Log.d("ScreenStatusService", "row updated: " + updatedRow);
+        Log.d("ScreenStatusService", "saveStateChangeInfo : row updated: " + updatedRow);
 
 
 

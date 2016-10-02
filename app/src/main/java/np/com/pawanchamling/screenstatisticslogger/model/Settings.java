@@ -21,6 +21,36 @@ public class Settings implements Serializable{
     private static long totalScreenOnCountToday;
     private static long totalScreenOnTimeToday;
     private static long totalScreenOffTimeToday;
+    private static String currentEventTimestamp;
+    private static String lastEventTimestamp;
+    private static String earlierEventTimestamp;
+
+    public static String getEarlierEventTimestamp() {
+        return earlierEventTimestamp;
+    }
+
+    public static void setEarlierEventTimestamp(String earlierEventTimestamp) {
+        Settings.earlierEventTimestamp = earlierEventTimestamp;
+    }
+
+
+    public static String getLastEventTimestamp() {
+        return lastEventTimestamp;
+    }
+
+    public static void setLastEventTimestamp(String lastEventTimestamp) {
+        Settings.lastEventTimestamp = lastEventTimestamp;
+    }
+
+
+    public static String getCurrentEventTimestamp() {
+        return currentEventTimestamp;
+    }
+
+    public static void setCurrentEventTimestamp(String currentEventTimestamp) {
+        Settings.currentEventTimestamp = currentEventTimestamp;
+    }
+
 
     public static long getTotalScreenOnCountToday() {
         return totalScreenOnCountToday;
