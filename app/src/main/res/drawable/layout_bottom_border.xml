@@ -7,14 +7,9 @@
     <!--</shape>-->
 
     <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
-        <item>
-            <shape android:shape="rectangle">
-                <solid android:color="#aaaaaa" />
-            </shape>
-        </item>
         <item android:bottom="1dp">
             <shape android:shape="rectangle">
-                <solid android:color="#aaaaaa" />
+                <solid android:color="#116484" />
             </shape>
         </item>
     </layer-list>

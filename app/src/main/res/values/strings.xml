@@ -15,7 +15,7 @@
     <string name="txt_last_screen_ON_at_timestamp">[last_screen_ON_timestamp]</string>
     <string name="txt_last_screen_ON_for">[last_screen_ON_timestamp]</string>
 
-    <string name="txt_screen_is_ON_for">Screen is ON for</string>
+    <string name="txt_screen_is_ON_for">Screen ON timer</string>
     <string name="txt_screen_is_ON_for_timestamp">[screen_time]</string>
     <string name="txt_today">Today</string>
 

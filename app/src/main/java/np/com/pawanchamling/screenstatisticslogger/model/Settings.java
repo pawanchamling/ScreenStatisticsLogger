@@ -18,6 +18,34 @@ public class Settings implements Serializable{
     private static long totalTimeScreenWasOn;
     private static long totalTimeScreenWasOff;
 
+    private static long totalScreenOnCountToday;
+    private static long totalScreenOnTimeToday;
+    private static long totalScreenOffTimeToday;
+
+    public static long getTotalScreenOnCountToday() {
+        return totalScreenOnCountToday;
+    }
+
+    public static void setTotalScreenOnCountToday(long totalScreenOnCountToday) {
+        Settings.totalScreenOnCountToday = totalScreenOnCountToday;
+    }
+
+    public static long getTotalScreenOnTimeToday() {
+        return totalScreenOnTimeToday;
+    }
+
+    public static void setTotalScreenOnTimeToday(long totalScreenOnTimeToday) {
+        Settings.totalScreenOnTimeToday = totalScreenOnTimeToday;
+    }
+
+    public static long getTotalScreenOffTimeToday() {
+        return totalScreenOffTimeToday;
+    }
+
+    public static void setTotalScreenOffTimeToday(long totalScreenOffTimeToday) {
+        Settings.totalScreenOffTimeToday = totalScreenOffTimeToday;
+    }
+
     public static long getTotalTimeScreenWasOn() {
         return totalTimeScreenWasOn;
     }

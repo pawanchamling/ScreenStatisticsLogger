@@ -7,12 +7,13 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.os.SystemClock;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
+import android.widget.Chronometer;
 import android.widget.TextView;
 
 import np.com.pawanchamling.screenstatisticslogger.db.MySQLiteHelper;
@@ -23,8 +24,10 @@ import np.com.pawanchamling.screenstatisticslogger.service.recordScreenStatusSer
 public class MainActivity extends AppCompatActivity {
     public MySQLiteHelper mDbHelper;
     public SQLiteDatabase db;
-    private Settings settings;
+    private Settings settingsAndStatus;
     private BroadcastReceiver broadcastReceiver;
+
+    public Chronometer screenONtimer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,7 +37,8 @@ public class MainActivity extends AppCompatActivity {
         //-- to delete the database that had bad schema
         //this.deleteDatabase("ScreenStatistics.db");
 
-        settings = new Settings();
+        //
+        settingsAndStatus = new Settings();
 
         //-- Creating a new database helper
         Log.d("MainActivity", "onCreate: Instantiating MySQLiteHelper");
@@ -42,6 +46,23 @@ public class MainActivity extends AppCompatActivity {
 
         //-- Get the database. If it does not exist, this is where it will also be created
         db = mDbHelper.getWritableDatabase();
+
+
+        screenONtimer = (Chronometer) findViewById(R.id.screenOnTimeChronometer);
+        screenONtimer.setOnChronometerTickListener(new Chronometer.OnChronometerTickListener(){
+            @Override
+            public void onChronometerTick(Chronometer cArg) {
+                long time = SystemClock.elapsedRealtime() - cArg.getBase();
+                int h   = (int)(time /3600000);
+                int m = (int)(time - h*3600000)/60000;
+                int s= (int)(time - h*3600000- m*60000)/1000 ;
+                String hh = h < 10 ? "0"+h: h+"";
+                String mm = m < 10 ? "0"+m: m+"";
+                String ss = s < 10 ? "0"+s: s+"";
+                cArg.setText(hh+":"+mm+":"+ss);
+            }
+        });
+        screenONtimer.setBase(SystemClock.elapsedRealtime());
 
 
         //-- If the Settings table is empty fill it with default values
@@ -59,27 +80,261 @@ public class MainActivity extends AppCompatActivity {
         Intent startRecordScreenStatusIntent = new Intent(this, recordScreenStatusService.class);
 //        startRecordScreenStatusIntent.putExtra("timestamp", fileNameTimeStamp);
         Bundle settingsServiceBundle = new Bundle();
-        settingsServiceBundle.putSerializable("settings", settings);
+        settingsServiceBundle.putSerializable("settingsAndStatus", settingsAndStatus);
         startRecordScreenStatusIntent.putExtras(settingsServiceBundle);
         startService(startRecordScreenStatusIntent);
 
 
-        //-- Defining a broadcaster listener that updates UI when service sends some value
-        broadcastReceiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
 
-                Bundle id = intent.getExtras();
-                if(id != null) {
-                    settings = (Settings)id.getSerializable("updateValuesInUI");
 
-                    Log.d("MainActivity", "Broadcasted Settings received ");
-                    Log.d("MainActivity", "Updating UI ");
-                    updateScreenInfo();
-                }
-            }
-        };
+
+
+
+        // Register to receive messages.
+        // We are registering an observer (screenOnEventMessageReceiver) to receive Intents with actions named "screenIsOnBroadcast".
+        LocalBroadcastManager.getInstance(this).registerReceiver(screenOnEventMessageReceiver,
+                new IntentFilter("screenIsOnBroadcast"));
+
+        // Register to receive messages.
+        // We are registering an observer (screenOffEventMessageReceiver) to receive Intents with actions named "screenIsOnBroadcast".
+        LocalBroadcastManager.getInstance(this).registerReceiver(screenOffEventMessageReceiver,
+                new IntentFilter("screenIsOffBroadcast"));
+
     }
+
+
+    // Our handler for received Intents. This will be called whenever an Intent
+    // with an action named "screenIsOnBroadcast" is broadcasted.
+    private BroadcastReceiver screenOnEventMessageReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+
+            Bundle id = intent.getExtras();
+            if(id != null) {
+
+                settingsAndStatus = (Settings)id.getSerializable("screenIsOnBroadcast");
+
+                Log.d("MainActivity", "screenIsOnBroadcast : broadcasted Settings received ");
+                Log.d("MainActivity", "Updating UI ");
+                updateScreenInfo();
+
+                screenONtimer.setFormat("H:MM:SS");
+                screenONtimer.start();
+            }
+        }
+    };
+
+    // Our handler for received Intents. This will be called whenever an Intent
+    // with an action named "screenIsOnBroadcast" is broadcasted.
+    private BroadcastReceiver screenOffEventMessageReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+
+            Bundle id = intent.getExtras();
+            if(id != null) {
+                settingsAndStatus = (Settings)id.getSerializable("screenIsOffBroadcast");
+
+                Log.d("MainActivity", "screenIsOffBroadcast : broadcasted Settings received ");
+
+                screenONtimer.setBase(SystemClock.elapsedRealtime());
+            }
+        }
+    };
+
+
+
+    public void getSettingsFromDB() {
+
+        Cursor c = db.rawQuery("SELECT * FROM " + ScreenStatisticsDatabaseContract.Table_SettingsAndStatus.TABLE_NAME,
+                null);
+
+        if(c.getCount() == 0) {
+            Log.d("MainActivity", "no data in the Settings: insert DEFAULT values");
+            db.execSQL(ScreenStatisticsDatabaseContract.Table_SettingsAndStatus.INSERT_DEFAULT);
+            c = db.rawQuery("SELECT * FROM " + ScreenStatisticsDatabaseContract.Table_SettingsAndStatus.TABLE_NAME,
+                    null);
+
+            Log.d("MainActivity", "Now SettingsInfo table have " + c.getCount() + " row");
+        }
+        else {
+            Log.d("MainActivity", "SettingsInfo table has data in it");
+        }
+
+        try {
+
+            //-- the cursor starts 'before' the first result row, so on the first iteration this moves
+            //-- to the first result 'if it exists'.
+            while(c.moveToNext()) {
+                settingsAndStatus.setRecordingState(c.getInt(1) == 1 ? true : false);
+                settingsAndStatus.setSmartAlarmState(c.getInt(2) == 1 ? true : false);
+                settingsAndStatus.setSmartSleepLogState(c.getInt(3) == 1 ? true : false);
+                settingsAndStatus.setSmartSleepLogStartReferenceTime(c.getString(4));
+                settingsAndStatus.setSmartSleepLogEndReferenceTime(c.getString(5));
+                settingsAndStatus.setSmartSleepLogOffsetValue(c.getInt(6));
+                settingsAndStatus.setLastScreenOnTimestamp(c.getString(7));
+                settingsAndStatus.setLastScreenOffTimestamp(c.getString(8));
+                settingsAndStatus.setTotalTimeScreenWasOn(c.getInt(9));
+                settingsAndStatus.setTotalTimeScreenWasOff(c.getInt(10));
+                settingsAndStatus.setTotalScreenOnCountToday(c.getInt(11));
+                settingsAndStatus.setTotalScreenOnTimeToday(c.getInt(12));
+                settingsAndStatus.setTotalScreenOffTimeToday(c.getInt(13));
+
+
+                //-- Just checking if the values are set in properly or not
+
+                if (settingsAndStatus.isRecordingState())
+                    Log.d("RecordingState", "true");
+                else
+                    Log.d("RecordingState", "false");
+
+
+                if (settingsAndStatus.isSmartAlarmState())
+                    Log.d("SmartAlarmState", "true");
+                else
+                    Log.d("SmartAlarmState", "false");
+
+
+                if (settingsAndStatus.isSmartSleepLogState())
+                    Log.d("SmartSleepLogState", "true");
+                else
+                    Log.d("SmartSleepLogState", "false");
+
+                Log.d("SleepStartReferenceTime", settingsAndStatus.getSmartSleepLogStartReferenceTime());
+                Log.d("SleepStopReferenceTime", settingsAndStatus.getSmartSleepLogEndReferenceTime());
+                Log.d("SleepOffsetTime", "" + settingsAndStatus.getSmartSleepLogOffsetValue());
+                Log.d("LastScreenOnTime", "" + settingsAndStatus.getLastScreenOnTimestamp());
+                Log.d("LastScreenOffTime", "" + settingsAndStatus.getLastScreenOffTimestamp());
+                Log.d("LastTotalScreenOnTime", "" + settingsAndStatus.getTotalTimeScreenWasOn());
+                Log.d("LastTotalScreenOffTime", "" + settingsAndStatus.getTotalTimeScreenWasOff());
+                Log.d("TotalScreenOnCountToday", "" + settingsAndStatus.getTotalScreenOnCountToday());
+                Log.d("TotalScreenOnTimeToday", "" + settingsAndStatus.getTotalScreenOnTimeToday());
+                Log.d("TotalScreenOffTimeToday", "" + settingsAndStatus.getTotalScreenOffTimeToday());
+
+            }
+        }
+        finally {
+            c.close();
+        }
+
+    }
+
+
+    public void getStatusFromDB() {
+
+        Cursor c = db.rawQuery("SELECT * FROM " + ScreenStatisticsDatabaseContract.Table_SettingsAndStatus.TABLE_NAME,
+                null);
+
+        if(c.getCount() == 0) {
+            Log.d("MainActivity", "no data in the Settings: insert default values");
+            db.execSQL(ScreenStatisticsDatabaseContract.Table_SettingsAndStatus.INSERT_DEFAULT);
+            c = db.rawQuery("SELECT * FROM " + ScreenStatisticsDatabaseContract.Table_SettingsAndStatus.TABLE_NAME,
+                    null);
+
+            Log.d("MainActivity", "Now SettingsInfo table have " + c.getCount() + " row");
+        }
+        else {
+            Log.d("MainActivity", "SettingsInfo table has data in it");
+        }
+
+        try {
+
+            //-- the cursor starts 'before' the first result row, so on the first iteration this moves
+            //-- to the first result 'if it exists'.
+            while (c.moveToNext()) {
+                settingsAndStatus.setLastScreenOffTimestamp(c.getString(8));
+                settingsAndStatus.setTotalTimeScreenWasOff(c.getInt(10));
+            }
+        }
+        finally {
+            c.close();
+        }
+
+    }
+
+
+
+    protected void onResume(){
+        super.onResume();
+
+        Log.d("MainActivity", "onResume");
+
+        getSettingsFromDB();
+        updateScreenInfo();
+
+
+    }
+
+    public void updateScreenInfo() {
+
+        Log.d("MainActivity", "updateScreenInfo");
+        String lastScreenOffTimestamp = settingsAndStatus.getLastScreenOffTimestamp();
+        TextView textView_last_screen_timestamp = (TextView) findViewById(R.id.textView_last_screen_timestamp);
+        textView_last_screen_timestamp.setText(lastScreenOffTimestamp);
+
+        Log.d("MainActivity", "diffTime = " + lastScreenOffTimestamp);
+
+
+
+
+        long diffTime = settingsAndStatus.getTotalTimeScreenWasOff();
+        String diffTimeStr = "";
+
+        if(diffTime < 60000) {
+            //-- less than minute
+            diffTimeStr = (diffTime / 1000)  + " seconds ago";
+        }
+        else if(diffTime >= 60000 && diffTime < 120000 ){
+
+            long seconds = diffTime % 60000;
+            diffTimeStr = (diffTime/60000) + " minute & " + seconds/1000 + " seconds ago";
+        }
+        else if(diffTime >= 120000 && diffTime < 3600000){
+            long seconds = diffTime % 60000;
+            diffTimeStr = (diffTime/60000) + " minutes & "+ seconds/1000 + " seconds ago";
+        }
+        else if(diffTime >= 3600000 && diffTime < 7200000){
+            long seconds = diffTime % 60000;
+            long minutes = diffTime % 3600000;
+            diffTimeStr = (diffTime/3600000) + " hour & "+ minutes/60000 + " minutes ago";
+        }
+        else {
+            long minutes = diffTime % 3600000;
+            diffTimeStr = (diffTime/3600000) + " hours & "+ minutes/60000 + " minutes ago";
+        }
+
+        Log.d("MainActivity", "diffTime = " + diffTime);
+
+
+        TextView textView_time_between_screen_on_and_off = (TextView) findViewById(R.id.textView_time_between_screen_on_and_off);
+        textView_time_between_screen_on_and_off.setText(diffTimeStr);
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        LocalBroadcastManager.getInstance(this).registerReceiver((broadcastReceiver),
+                new IntentFilter("updateValuesInUI")
+        );
+    }
+
+    @Override
+    protected void onStop() {
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(broadcastReceiver);
+        super.onStop();
+    }
+
+
+
+    public void settingsActivity(View v) {
+
+    }
+
+
+
+
+
+
+
 
 
 
@@ -164,185 +419,4 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    public void getSettingsFromDB() {
-
-        Cursor c = db.rawQuery("SELECT * FROM " + ScreenStatisticsDatabaseContract.Table_SettingsAndStatus.TABLE_NAME,
-                null);
-
-        if(c.getCount() == 0) {
-            Log.d("MainActivity", "no data in the Settings: insert DEFAULT values");
-            db.execSQL(ScreenStatisticsDatabaseContract.Table_SettingsAndStatus.INSERT_DEFAULT);
-            c = db.rawQuery("SELECT * FROM " + ScreenStatisticsDatabaseContract.Table_SettingsAndStatus.TABLE_NAME,
-                    null);
-
-            Log.d("MainActivity", "Now SettingsInfo table have " + c.getCount() + " row");
-        }
-        else {
-            Log.d("MainActivity", "SettingsInfo table has data in it");
-        }
-
-        try {
-
-            //-- the cursor starts 'before' the first result row, so on the first iteration this moves
-            //-- to the first result 'if it exists'.
-            while(c.moveToNext()) {
-                settings.setRecordingState(c.getInt(1) == 1 ? true : false);
-                settings.setSmartAlarmState(c.getInt(2) == 1 ? true : false);
-                settings.setSmartSleepLogState(c.getInt(3) == 1 ? true : false);
-                settings.setSmartSleepLogStartReferenceTime(c.getString(4));
-                settings.setSmartSleepLogEndReferenceTime(c.getString(5));
-                settings.setSmartSleepLogOffsetValue(c.getInt(6));
-                settings.setLastScreenOnTimestamp(c.getString(7));
-                settings.setLastScreenOffTimestamp(c.getString(8));
-                settings.setTotalTimeScreenWasOn(c.getInt(9));
-                settings.setTotalTimeScreenWasOff(c.getInt(10));
-
-
-
-                //-- Just checking if the values are set in properly or not
-
-                if (settings.isRecordingState())
-                    Log.d("RecordingState", "true");
-                else
-                    Log.d("RecordingState", "false");
-
-
-                if (settings.isSmartAlarmState())
-                    Log.d("SmartAlarmState", "true");
-                else
-                    Log.d("SmartAlarmState", "false");
-
-
-                if (settings.isSmartSleepLogState())
-                    Log.d("SmartSleepLogState", "true");
-                else
-                    Log.d("SmartSleepLogState", "false");
-
-                Log.d("SleepStartReferenceTime", settings.getSmartSleepLogStartReferenceTime());
-                Log.d("SleepStopReferenceTime", settings.getSmartSleepLogEndReferenceTime());
-                Log.d("SleepOffsetTime", "" + settings.getSmartSleepLogOffsetValue());
-                Log.d("LastScreenOnTime", "" + settings.getLastScreenOnTimestamp());
-                Log.d("LastScreenOffTime", "" + settings.getLastScreenOffTimestamp());
-                Log.d("LastTotalScreenOnTime", "" + settings.getTotalTimeScreenWasOn());
-                Log.d("LastTotalScreenOffTime", "" + settings.getTotalTimeScreenWasOff());
-
-
-            }
-        }
-        finally {
-            c.close();
-        }
-
-    }
-
-
-    public void getStatusFromDB() {
-
-        Cursor c = db.rawQuery("SELECT * FROM " + ScreenStatisticsDatabaseContract.Table_SettingsAndStatus.TABLE_NAME,
-                null);
-
-        if(c.getCount() == 0) {
-            Log.d("MainActivity", "no data in the Settings: insert default values");
-            db.execSQL(ScreenStatisticsDatabaseContract.Table_SettingsAndStatus.INSERT_DEFAULT);
-            c = db.rawQuery("SELECT * FROM " + ScreenStatisticsDatabaseContract.Table_SettingsAndStatus.TABLE_NAME,
-                    null);
-
-            Log.d("MainActivity", "Now SettingsInfo table have " + c.getCount() + " row");
-        }
-        else {
-            Log.d("MainActivity", "SettingsInfo table has data in it");
-        }
-
-        try {
-
-            //-- the cursor starts 'before' the first result row, so on the first iteration this moves
-            //-- to the first result 'if it exists'.
-            while (c.moveToNext()) {
-                settings.setLastScreenOffTimestamp(c.getString(8));
-                settings.setTotalTimeScreenWasOff(c.getInt(10));
-            }
-        }
-        finally {
-            c.close();
-        }
-
-    }
-
-
-
-    protected void onResume(){
-        super.onResume();
-
-        Log.d("MainActivity", "onResume");
-
-        getSettingsFromDB();
-        updateScreenInfo();
-
-
-    }
-
-    public void updateScreenInfo() {
-
-        Log.d("MainActivity", "updateScreenInfo");
-        String lastScreenOffTimestamp = settings.getLastScreenOffTimestamp();
-        TextView textView_last_screen_timestamp = (TextView) findViewById(R.id.textView_last_screen_timestamp);
-        textView_last_screen_timestamp.setText(lastScreenOffTimestamp);
-
-        Log.d("MainActivity", "diffTime = " + lastScreenOffTimestamp);
-
-
-
-
-        long diffTime = settings.getTotalTimeScreenWasOff();
-        String diffTimeStr = "";
-
-        if(diffTime < 60000) {
-            //-- less than minute
-            diffTimeStr = (diffTime / 1000)  + " seconds ago";
-        }
-        else if(diffTime >= 60000 && diffTime < 120000 ){
-
-            long seconds = diffTime % 60000;
-            diffTimeStr = (diffTime/60000) + " minute & " + seconds/1000 + " seconds ago";
-        }
-        else if(diffTime >= 120000 && diffTime < 3600000){
-            long seconds = diffTime % 60000;
-            diffTimeStr = (diffTime/60000) + " minutes & "+ seconds/1000 + " seconds ago";
-        }
-        else if(diffTime >= 3600000 && diffTime < 7200000){
-            long seconds = diffTime % 60000;
-            long minutes = diffTime % 3600000;
-            diffTimeStr = (diffTime/3600000) + " hour & "+ minutes/60000 + " minutes ago";
-        }
-        else {
-            long minutes = diffTime % 3600000;
-            diffTimeStr = (diffTime/3600000) + " hours & "+ minutes/60000 + " minutes ago";
-        }
-
-        Log.d("MainActivity", "diffTime = " + diffTime);
-
-
-        TextView textView_time_between_screen_on_and_off = (TextView) findViewById(R.id.textView_time_between_screen_on_and_off);
-        textView_time_between_screen_on_and_off.setText(diffTimeStr);
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-        LocalBroadcastManager.getInstance(this).registerReceiver((broadcastReceiver),
-                new IntentFilter("updateValuesInUI")
-        );
-    }
-
-    @Override
-    protected void onStop() {
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(broadcastReceiver);
-        super.onStop();
-    }
-
-
-
-    public void settingsActivity(View v) {
-
-    }
 }

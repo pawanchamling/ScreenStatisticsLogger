@@ -50,6 +50,9 @@ public class ScreenStatisticsDatabaseContract {
         public static final String COLUMN_LAST_SCREEN_OFF_TIMESTAMP     = "last_screen_off_timestamp";
         public static final String COLUMN_LAST_TOTAL_SCREEN_ON_TIME     = "total_screen_on_time";
         public static final String COLUMN_LAST_TOTAL_SCREEN_OFF_TIME    = "smart_screen_off_time";
+        public static final String COLUMN_SCREEN_ON_COUNT_TODAY         = "screen_on_count_today";
+        public static final String COLUMN_SCREEN_ON_TIME_LENGTH_TODAY   = "screen_on_time_length_today";
+        public static final String COLUMN_SCREEN_OFF_TIME_LENGTH_TODAY  = "screen_off_time_length_today";
 
         public static final String CREATE_TABLE = "CREATE TABLE " +
                 TABLE_NAME + " (" +
@@ -63,7 +66,10 @@ public class ScreenStatisticsDatabaseContract {
                 COLUMN_LAST_SCREEN_ON_TIMESTAMP     + TYPE_TEXT         + COMMA_SEP +
                 COLUMN_LAST_SCREEN_OFF_TIMESTAMP    + TYPE_TEXT         + COMMA_SEP +
                 COLUMN_LAST_TOTAL_SCREEN_ON_TIME    + TYPE_INTEGER      + COMMA_SEP +
-                COLUMN_LAST_TOTAL_SCREEN_OFF_TIME   + TYPE_INTEGER      +
+                COLUMN_LAST_TOTAL_SCREEN_OFF_TIME   + TYPE_INTEGER      + COMMA_SEP +
+                COLUMN_SCREEN_ON_COUNT_TODAY        + TYPE_INTEGER      + COMMA_SEP +
+                COLUMN_SCREEN_ON_TIME_LENGTH_TODAY  + TYPE_INTEGER      + COMMA_SEP +
+                COLUMN_SCREEN_OFF_TIME_LENGTH_TODAY + TYPE_INTEGER      +
                 ")";
 
         public static final String DELETE_TABLE = "DROP TABLE IF EXISTS " + TABLE_NAME;
@@ -78,8 +84,11 @@ public class ScreenStatisticsDatabaseContract {
                 COLUMN_LAST_SCREEN_ON_TIMESTAMP     + COMMA_SEP +
                 COLUMN_LAST_SCREEN_OFF_TIMESTAMP    + COMMA_SEP +
                 COLUMN_LAST_TOTAL_SCREEN_ON_TIME    + COMMA_SEP +
-                COLUMN_LAST_TOTAL_SCREEN_OFF_TIME   +
-                ") VALUES(0,0,1, '21:00', '05:00', 0, '--:--', '--|--', 0, 0 )"; // 0 = false, 1 = true for boolean types
+                COLUMN_LAST_TOTAL_SCREEN_OFF_TIME   + COMMA_SEP +
+                COLUMN_SCREEN_ON_COUNT_TODAY        + COMMA_SEP +
+                COLUMN_SCREEN_ON_TIME_LENGTH_TODAY  + COMMA_SEP +
+                COLUMN_SCREEN_OFF_TIME_LENGTH_TODAY +
+                ") VALUES(0,0,1, '21:00', '05:00', 0, '--:--', '--|--', 0, 0, 0, 0, 0 )"; // 0 = false, 1 = true for boolean types
     }
 
     //-- To keep Smart Sleep Logs or Records
@@ -87,6 +96,7 @@ public class ScreenStatisticsDatabaseContract {
         public static final String TABLE_NAME                   = "SmartSleepLog";
         public static final String COLUMN_SLEEP_START_TIMESTAMP = "sleep_start_timestamp";
         public static final String COLUMN_SLEEP_STOP_TIMESTAMP  = "sleep_stop_timestamp";
+        public static final String COLUMN_SLEEP_TOTAL_LENGTH    = "sleep_total_length";
         public static final String COLUMN_SLEEP_LENGTH          = "sleep_length";
         public static final String COLUMN_SLEEP_OFFSET          = "sleep_offset"; //time it may take to fall asleep - customization for each sleep -- in minutes
 
@@ -95,6 +105,7 @@ public class ScreenStatisticsDatabaseContract {
                 _ID + " INTEGER PRIMARY KEY," +
                 COLUMN_SLEEP_START_TIMESTAMP    + TYPE_TEXT     + COMMA_SEP +
                 COLUMN_SLEEP_STOP_TIMESTAMP     + TYPE_TEXT     + COMMA_SEP +
+                COLUMN_SLEEP_TOTAL_LENGTH       + TYPE_INTEGER  + COMMA_SEP +
                 COLUMN_SLEEP_LENGTH             + TYPE_INTEGER  + COMMA_SEP +
                 COLUMN_SLEEP_OFFSET             + TYPE_INTEGER  + ")";
 

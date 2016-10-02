@@ -7,24 +7,16 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 
 import android.support.v4.content.LocalBroadcastManager;
 import android.text.format.DateFormat;
 import android.util.Log;
-import android.widget.Toast;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.OutputStreamWriter;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Date;
-import java.util.Locale;
-import java.util.TimeZone;
 
 import np.com.pawanchamling.screenstatisticslogger.ScreenReceiver;
 import np.com.pawanchamling.screenstatisticslogger.db.MySQLiteHelper;
@@ -36,7 +28,7 @@ import np.com.pawanchamling.screenstatisticslogger.model.Settings;
  */
 
 public class recordScreenStatusService extends Service {
-    private Settings settings;
+    private Settings settingsAndStatus;
     public MySQLiteHelper mDbHelper;
     public SQLiteDatabase db;
 
@@ -83,7 +75,7 @@ public class recordScreenStatusService extends Service {
         super.onStart(intent, startId);
         Bundle id = intent.getExtras();
         if(id != null) {
-            settings = (Settings)id.getSerializable("settings");
+            settingsAndStatus = (Settings)id.getSerializable("settingsAndStatus");
 
             Log.d("ScreenStatusService", "Settings received ");
         }
@@ -145,9 +137,9 @@ public class recordScreenStatusService extends Service {
         ContentValues statusValues = new ContentValues();
 
 
-
+        //-- Screen is ON
         if(screenIsOn) {
-            lastTimestamp = settings.getLastScreenOffTimestamp();
+            lastTimestamp = settingsAndStatus.getLastScreenOffTimestamp();
             if(lastTimestamp.equals("--|--")) {
                 diffTime = 0;
             }
@@ -170,14 +162,14 @@ public class recordScreenStatusService extends Service {
             screenStatusIs = "ON";
             Log.d("ScreenStatusService", "Screen status ON");
 
-            settings.setLastScreenOnTimestamp(currentTimeStamp);
-            settings.setTotalTimeScreenWasOff(diffTime );
+            settingsAndStatus.setLastScreenOnTimestamp(currentTimeStamp);
+            settingsAndStatus.setTotalTimeScreenWasOff(diffTime );
 
             statusValues.put(ScreenStatisticsDatabaseContract.Table_SettingsAndStatus.COLUMN_LAST_SCREEN_ON_TIMESTAMP, currentTimeStamp);
             statusValues.put(ScreenStatisticsDatabaseContract.Table_SettingsAndStatus.COLUMN_LAST_TOTAL_SCREEN_OFF_TIME, diffTime);
         }
         else {
-            lastTimestamp = settings.getLastScreenOnTimestamp();
+            lastTimestamp = settingsAndStatus.getLastScreenOnTimestamp();
             if(lastTimestamp.equals("--|--")) {
                 diffTime = 0;
             }
@@ -200,8 +192,8 @@ public class recordScreenStatusService extends Service {
             screenStatusIs = "OFF";
             Log.d("ScreenStatusService", "Screen status OFF");
 
-            settings.setLastScreenOffTimestamp(currentTimeStamp);
-            settings.setTotalTimeScreenWasOn(diffTime);
+            settingsAndStatus.setLastScreenOffTimestamp(currentTimeStamp);
+            settingsAndStatus.setTotalTimeScreenWasOn(diffTime);
 
             statusValues.put(ScreenStatisticsDatabaseContract.Table_SettingsAndStatus.COLUMN_LAST_SCREEN_OFF_TIMESTAMP, currentTimeStamp);
             statusValues.put(ScreenStatisticsDatabaseContract.Table_SettingsAndStatus.COLUMN_LAST_TOTAL_SCREEN_ON_TIME, diffTime);
@@ -235,15 +227,25 @@ public class recordScreenStatusService extends Service {
 
 
 
+        //-- Sending the info to the MainActivity to display it
         if(screenIsOn) {
-            Intent intent = new Intent("updateValuesInUI");
-           // intent.putExtra("updateValuesInUI", settings);
+            Intent intent = new Intent("screenIsOnBroadcast");
+           // intent.putExtra("updateValuesInUI", settingsAndStatus);
 
 
             Bundle settingsServiceBundle = new Bundle();
-            settingsServiceBundle.putSerializable("settings", settings);
+            settingsServiceBundle.putSerializable("settingsAndStatus", settingsAndStatus);
             intent.putExtras(settingsServiceBundle);
             localBroadcastManager.sendBroadcast(intent);
+        }
+        else {
+            Intent intent = new Intent("screenIsOffBroadcast");
+
+            Bundle settingsServiceBundle = new Bundle();
+            settingsServiceBundle.putSerializable("settingsAndStatus", settingsAndStatus);
+            intent.putExtras(settingsServiceBundle);
+            localBroadcastManager.sendBroadcast(intent);
+
         }
 
     }
@@ -311,7 +313,7 @@ public class recordScreenStatusService extends Service {
                 directory.mkdirs();
 
                 //Now create the file in the above directory and write the contents into it
-                File file = new File(directory, settings.getFileTimeStamp() + "_GPS_data.json");
+                File file = new File(directory, settingsAndStatus.getFileTimeStamp() + "_GPS_data.json");
                 FileOutputStream fileOutputStream = new FileOutputStream(file);
                 OutputStreamWriter outputWriter = new OutputStreamWriter(fileOutputStream);
 
