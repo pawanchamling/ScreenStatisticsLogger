@@ -338,7 +338,7 @@
                     android:layout_column="11"
                     android:layout_weight=".3"
                     android:background="@drawable/rounded_button"
-                    android:onClick="settingsActivity"
+                    android:onClick="showAllLoggedDataActivity"
                     android:text="@string/txt_show_all_logged_data"
                     android:textSize="12sp" />
 

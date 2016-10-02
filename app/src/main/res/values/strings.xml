@@ -4,7 +4,7 @@
     <string name="txt_start_recording">Start Recording</string>
     <string name="txt_stop_recording">Stop Recording</string>
 
-    <string name="txt_last_screen_OFF_at">Screen was last turned off at</string>
+    <string name="txt_last_screen_OFF_at">Screen was last turned OFF at</string>
     <string name="txt_last_screen_OFF_timestamp">[last_screen_off_timestamp]</string>
     <string name="txt_last_screen_OFF_for">[time-diff]</string>
 

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<TableRow xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/theTableRow"
+    android:layout_width="match_parent"
+    android:layout_weight="10"
+    android:layout_height="match_parent">
+
+    <TextView
+        android:id="@+id/col_timestamp"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="4.5"
+        android:text="Time"
+        android:textStyle="normal|bold" />
+
+    <TextView
+        android:id="@+id/col_screen_status"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1.5"
+        android:text="Screen was turned"
+        android:textStyle="normal|bold" />
+
+    <TextView
+        android:id="@+id/col_diff"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="4"
+        android:text="After the duration of"
+        android:textStyle="normal|bold" />
+</TableRow>

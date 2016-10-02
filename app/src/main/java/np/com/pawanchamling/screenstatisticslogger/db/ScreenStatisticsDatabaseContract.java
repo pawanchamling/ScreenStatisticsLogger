@@ -34,6 +34,8 @@ public class ScreenStatisticsDatabaseContract {
 
         public static final String DELETE_TABLE = "DROP TABLE IF EXISTS " + TABLE_NAME;
 
+        public static final String SELECT_DESC = "SELECT * FROM " + TABLE_NAME + " ORDER BY " + _ID + " DESC";
+
     }
 
 
@@ -89,6 +91,8 @@ public class ScreenStatisticsDatabaseContract {
                 COLUMN_SCREEN_ON_TIME_LENGTH_TODAY  + COMMA_SEP +
                 COLUMN_SCREEN_OFF_TIME_LENGTH_TODAY +
                 ") VALUES(0,0,1, '21:00', '05:00', 0, '--:--', '--|--', 0, 0, 0, 0, 0 )"; // 0 = false, 1 = true for boolean types
+
+        public static final String SELECT_DESC = "SELECT * FROM " + TABLE_NAME + " ORDER BY " + _ID + " DESC";
     }
 
     //-- To keep Smart Sleep Logs or Records

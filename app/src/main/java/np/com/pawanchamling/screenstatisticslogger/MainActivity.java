@@ -275,6 +275,7 @@ public class MainActivity extends AppCompatActivity {
 
 
 
+    @Override
     protected void onResume(){
         super.onResume();
 
@@ -363,6 +364,18 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    public void showAllLoggedDataActivity(View view) {
+
+        Intent allLoggedDataActivityIntent = new Intent(MainActivity.this, AllLoggedDataActivity.class);
+        // String fileNameTimeStamp = getTimeStampForName();
+//
+//        Bundle bundle = new Bundle();
+//        bundle.putSerializable("settings", settings );
+//        allLoggedDataActivityIntent.putExtras(bundle);
+        startActivity(allLoggedDataActivityIntent);
+
+
+    }
 
 
 
