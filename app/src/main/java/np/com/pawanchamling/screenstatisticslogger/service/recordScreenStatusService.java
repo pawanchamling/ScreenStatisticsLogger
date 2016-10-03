@@ -198,6 +198,65 @@ public class recordScreenStatusService extends Service {
 
 
 
+            //-- if the Smart Sleep logging is turned ON
+            if(settingsAndStatus.isSmartSleepLogState()) {
+                String screenOFFtimestamp = settingsAndStatus.getCurrentEventTimestamp();
+                screenOFFtimestamp = basicHelper.getCleanerTimestamp(screenOFFtimestamp, false);
+                screenOFFtimestamp = screenOFFtimestamp.substring(0, 5); // get only HH:mm
+
+
+                if((screenOFFtimestamp.compareTo(settingsAndStatus.getSmartSleepLogStartReferenceTime()) < 0 ) &&
+                        (settingsAndStatus.getSmartSleepLogEndReferenceTime().compareTo(screenOFFtimestamp )< 0)
+                        ) {
+                    //-- screenOFFtimestamp is greater than SmartSleepLogStartrReferenceTime
+                    //-- screenOFFtimestamp is less than SmartSleepLogEndReferenceTime
+                    //-- This means sleep started
+
+
+                    String screenONtimestamp = basicHelper.getCleanerTimestamp(newCurrentTimestamp, false);
+                    screenONtimestamp = screenONtimestamp.substring(0, 5); // get only HH:mm
+
+
+                    if ((settingsAndStatus.getSmartSleepLogEndReferenceTime().compareTo(screenONtimestamp) < 0) &&
+                            (screenONtimestamp.compareTo(settingsAndStatus.getSmartSleepLogStartReferenceTime()) < 0)
+                            ) {
+                        //-- screenONtimestamp is greater than SmartSleepLogEndReferenceTime
+                        //-- screenONtimestamp is less than SmartSleepLogStartrReferenceTime
+                        //-- This means sleep ended
+
+
+                        ContentValues sleepLogValues = new ContentValues();
+
+                        sleepLogValues.put(ScreenStatisticsDatabaseContract.Table_SmartSleepLog.COLUMN_SLEEP_START_TIMESTAMP, settingsAndStatus.getCurrentEventTimestamp());
+                        sleepLogValues.put(ScreenStatisticsDatabaseContract.Table_SmartSleepLog.COLUMN_SLEEP_STOP_TIMESTAMP, newCurrentTimestamp);
+
+                        //long sleepTotalLength = diffTime;
+                        long offSetTime = settingsAndStatus.getSmartSleepLogOffsetValue() * 1000 ^ 60; //converting minutes to milliseconds
+                        long sleepLength = diffTime - offSetTime;
+
+                        sleepLogValues.put(ScreenStatisticsDatabaseContract.Table_SmartSleepLog.COLUMN_SLEEP_TOTAL_LENGTH, diffTime);
+                        sleepLogValues.put(ScreenStatisticsDatabaseContract.Table_SmartSleepLog.COLUMN_SLEEP_LENGTH, sleepLength);
+                        sleepLogValues.put(ScreenStatisticsDatabaseContract.Table_SmartSleepLog.COLUMN_SLEEP_OFFSET, settingsAndStatus.getSmartSleepLogOffsetValue());
+
+
+                        //-- Insert the new row, returning the primary key value of the new row
+                        long newRowId = db.insert(ScreenStatisticsDatabaseContract.Table_SmartSleepLog.TABLE_NAME, null, sleepLogValues);
+                        Log.d("ScreenStatusService", "saveStateChangeInfo : row inserted into " +
+                                ScreenStatisticsDatabaseContract.Table_SmartSleepLog.TABLE_NAME
+                                + " : row id = " + newRowId);
+
+
+
+                    }
+
+
+                }
+
+
+
+            }
+
+
         }
         else {
             screenStatusIs = "OFF";
@@ -277,12 +336,16 @@ public class recordScreenStatusService extends Service {
 
         //-- Insert the new row, returning the primary key value of the new row
         long newRowId = db.insert(ScreenStatisticsDatabaseContract.Table_ScreenStats.TABLE_NAME, null, values);
-        Log.d("ScreenStatusService", "saveStateChangeInfo : row inserted: " + newRowId);
+        Log.d("ScreenStatusService", "saveStateChangeInfo : row inserted into" +
+                ScreenStatisticsDatabaseContract.Table_ScreenStats.TABLE_NAME
+                + " : row id = " + newRowId);
 
 
 
         int updatedRow = db.update(ScreenStatisticsDatabaseContract.Table_SettingsAndStatus.TABLE_NAME, statusValues, "_id=1", null);
-        Log.d("ScreenStatusService", "saveStateChangeInfo : row updated: " + updatedRow);
+        Log.d("ScreenStatusService", "saveStateChangeInfo : row updated in table " +
+                ScreenStatisticsDatabaseContract.Table_SettingsAndStatus.TABLE_NAME +
+                " : row " + updatedRow);
 
 
 

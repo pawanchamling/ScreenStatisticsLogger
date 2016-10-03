@@ -63,7 +63,11 @@ public class BasicHelper {
 
 
 
-
+/*
+* String timestamp, boolean includeDate
+ * if includeDate is false, returns timestamp in HH:mm:ss format
+ * if includeDate is true, returns timestamp in HH:mm:ss (yyyy-MM-dd) format
+ */
     public String getCleanerTimestamp(String timestamp, boolean includeDate) {
 
         Log.d("MainActivity", "cleaner Timestamp for  = " + timestamp);
