@@ -20,7 +20,8 @@
             android:name=".service.recordScreenStatusService"
             android:exported="false" />
 
-        <activity android:name=".AllLoggedDataActivity"></activity>
+        <activity android:name=".AllLoggedDataActivity" />
+        <activity android:name=".AllSmartSleepLogActivity"></activity>
     </application>
 
 </manifest>

@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TableRow xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/theTableRow_smart_sleep_log"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_weight="10">
+
+    <TextView
+        android:id="@+id/col_sleep_start"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="3"
+        android:text="Sleep Start"
+        android:textAlignment="center"
+        android:textSize="10sp"
+        android:textStyle="normal|bold" />
+
+    <TextView
+        android:id="@+id/col_sleep_stop"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="3"
+        android:gravity="center"
+        android:text="Sleep Stop"
+        android:textAlignment="center"
+        android:textSize="10sp"
+        android:textStyle="normal|bold" />
+
+    <TextView
+        android:id="@+id/col_total_length"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1.5"
+        android:text="total length"
+        android:textSize="10sp"
+        android:textStyle="normal|bold" />
+
+    <TextView
+        android:id="@+id/col_sleep_length"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1.5"
+        android:text="sleep length"
+        android:textAlignment="center"
+        android:textSize="10sp"
+        android:textStyle="normal|bold" />
+
+    <TextView
+        android:id="@+id/col_sleep_offset"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:text="Offset"
+        android:textAlignment="center"
+        android:textSize="10sp"
+        android:textStyle="normal|bold" />
+</TableRow>

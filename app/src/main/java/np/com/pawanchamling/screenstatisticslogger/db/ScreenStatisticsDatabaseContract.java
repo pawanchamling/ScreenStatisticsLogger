@@ -114,6 +114,9 @@ public class ScreenStatisticsDatabaseContract {
                 COLUMN_SLEEP_OFFSET             + TYPE_INTEGER  + ")";
 
         public static final String DELETE_TABLE = "DROP TABLE IF EXISTS " + TABLE_NAME;
+
+
+        public static final String SELECT_DESC = "SELECT * FROM " + TABLE_NAME + " ORDER BY " + _ID + " DESC";
     }
 
 }

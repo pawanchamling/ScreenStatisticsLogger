@@ -377,7 +377,10 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-
+public void showAllSmartSleepLogActivity(View view) {
+    Intent allSmartSleepLogActivityIntent = new Intent(MainActivity.this, AllSmartSleepLogActivity.class);
+    startActivity(allSmartSleepLogActivityIntent);
+}
 
 
 

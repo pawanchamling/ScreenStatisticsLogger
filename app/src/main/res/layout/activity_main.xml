@@ -353,7 +353,7 @@
                     android:layout_marginRight="5dp"
                     android:layout_weight=".3"
                     android:background="@drawable/rounded_button"
-                    android:onClick="settingsActivity"
+                    android:onClick="showAllSmartSleepLogActivity"
                     android:text="@string/txt_show_all_smart_sleep_logs"
                     android:textSize="12sp" />
 

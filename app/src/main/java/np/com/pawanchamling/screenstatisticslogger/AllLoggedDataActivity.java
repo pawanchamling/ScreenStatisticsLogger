@@ -6,7 +6,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.widget.LinearLayout;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
@@ -55,10 +54,10 @@ public class AllLoggedDataActivity extends AppCompatActivity {
 
 
                     LayoutInflater inflater = (LayoutInflater) AllLoggedDataActivity.this.getSystemService(AllLoggedDataActivity.this.LAYOUT_INFLATER_SERVICE);
-                    TableRow row = (TableRow) inflater.inflate(R.layout.table_row, null);
+                    TableRow row = (TableRow) inflater.inflate(R.layout.table_row_all_logs, null);
 
                     //Button mButton = (Button) inflater.inflate(R.layout.button, null);
-//                    //TableRow row = (TableRow) LayoutInflater.from(AllLoggedDataActivity.this).inflate(R.layout.table_row, null);
+//                    //TableRow row = (TableRow) LayoutInflater.from(AllLoggedDataActivity.this).inflate(R.layout.table_row_all_logs, null);
                    // TableRow row = (TableRow) findViewById(R.id.theTableRow);
 
                     String timestamp = c.getString(1);
