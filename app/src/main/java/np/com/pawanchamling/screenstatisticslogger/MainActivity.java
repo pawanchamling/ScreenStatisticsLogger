@@ -44,7 +44,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         //-- to delete the database that had bad schema
-        //this.deleteDatabase("ScreenStatistics.db");
+        this.deleteDatabase("ScreenStatistics.db");
 
         //
         settingsAndStatus = new Settings();

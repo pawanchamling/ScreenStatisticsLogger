@@ -200,10 +200,10 @@ public class recordScreenStatusService extends Service {
                 screenOFFtimestamp = screenOFFtimestamp.substring(0, 5); // get only HH:mm
 
 
-                if((screenOFFtimestamp.compareTo(settingsAndStatus.getSmartSleepLogStartReferenceTime()) < 0 ) &&
-                        (settingsAndStatus.getSmartSleepLogEndReferenceTime().compareTo(screenOFFtimestamp )< 0)
+                if((screenOFFtimestamp.compareTo(settingsAndStatus.getSmartSleepLogStartReferenceTime()) < 0 ) ||
+                        (settingsAndStatus.getSmartSleepLogEndReferenceTime().compareTo(screenOFFtimestamp ) < 0 )
                         ) {
-                    //-- screenOFFtimestamp is greater than SmartSleepLogStartrReferenceTime
+                    //-- screenOFFtimestamp is greater than SmartSleepLogStartReferenceTime or less than
                     //-- screenOFFtimestamp is less than SmartSleepLogEndReferenceTime
                     //-- This means sleep started
 
@@ -212,11 +212,11 @@ public class recordScreenStatusService extends Service {
                     screenONtimestamp = screenONtimestamp.substring(0, 5); // get only HH:mm
 
 
-                    if ((settingsAndStatus.getSmartSleepLogEndReferenceTime().compareTo(screenONtimestamp) < 0) &&
-                            (screenONtimestamp.compareTo(settingsAndStatus.getSmartSleepLogStartReferenceTime()) < 0)
+                    if ((settingsAndStatus.getSmartSleepLogEndReferenceTime().compareTo(screenONtimestamp) < 0)
+                            && (screenONtimestamp.compareTo(settingsAndStatus.getSmartSleepLogStartReferenceTime()) < 0)
                             ) {
                         //-- screenONtimestamp is greater than SmartSleepLogEndReferenceTime
-                        //-- screenONtimestamp is less than SmartSleepLogStartrReferenceTime
+                        //-- screenONtimestamp is less than SmartSleepLogStartReferenceTime
                         //-- This means sleep ended
 
 
