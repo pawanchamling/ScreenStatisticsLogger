@@ -11,14 +11,12 @@ import android.os.IBinder;
 import android.support.annotation.Nullable;
 
 import android.support.v4.content.LocalBroadcastManager;
-import android.text.format.DateFormat;
 import android.util.Log;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
-import np.com.pawanchamling.screenstatisticslogger.MainActivity;
 import np.com.pawanchamling.screenstatisticslogger.ScreenReceiver;
 import np.com.pawanchamling.screenstatisticslogger.db.MySQLiteHelper;
 import np.com.pawanchamling.screenstatisticslogger.db.ScreenStatisticsDatabaseContract;
@@ -136,6 +134,8 @@ public class recordScreenStatusService extends Service {
 
         ContentValues statusValues = new ContentValues();
 
+        //---------------------------------------------------------------------------------------------------------------------
+        //===================================================[ ON ]============================================================
         //-- Screen is ON
         if(screenIsOn) {
             screenStatusIs = "ON";
@@ -180,40 +180,54 @@ public class recordScreenStatusService extends Service {
 
 
 
-            if(basicHelper.isScreenOnInANewDay(settingsAndStatus.getCurrentEventTimestamp(), settingsAndStatus.getEarlierEventTimestamp())) {
-                Log.d("ScreenStatusService", "saveStateChangeInfo : TotalScreenOffTimeToday was = " + settingsAndStatus.getTotalScreenOffTimeToday());
-                settingsAndStatus.setTotalScreenOffTimeToday(settingsAndStatus.getTotalScreenOffTimeToday() + diffTime);
+
+            if(basicHelper.areTheseTimestampsOnTheSameDay(l_currentEventTimestamp, settingsAndStatus.getLastEventTimestamp())) {
+                Log.d("ScreenStatusService", "saveStateChangeInfo : TotalScreenOnTimeToday was = " + settingsAndStatus.getTotalScreenOnTimeToday());
+                settingsAndStatus.setTotalScreenOnTimeToday(settingsAndStatus.getTotalScreenOnTimeToday() + diffTime);
             }
             else {
-                Log.d("ScreenStatusService", "saveStateChangeInfo : TotalScreenOffTimeToday => New day count is reset to 0");
-                settingsAndStatus.setTotalScreenOffTimeToday(diffTime);
+                Log.d("ScreenStatusService", "saveStateChangeInfo : TotalScreenOnTimeToday => New day count is reset to 0");
+                settingsAndStatus.setTotalScreenOnTimeToday(diffTime);
             }
 
-            statusValues.put(ScreenStatisticsDatabaseContract.Table_SettingsAndStatus.COLUMN_SCREEN_OFF_TIME_LENGTH_TODAY, settingsAndStatus.getTotalScreenOffTimeToday() );
+            statusValues.put(ScreenStatisticsDatabaseContract.Table_SettingsAndStatus.COLUMN_SCREEN_ON_TIME_LENGTH_TODAY, settingsAndStatus.getTotalScreenOnTimeToday() );
 
 
 
-            //-- if the Smart Sleep logging is turned ON
+
+            //-----[ if the Smart Sleep logging is turned ON ]-----
             if(settingsAndStatus.isSmartSleepLogState()) {
                 String screenOFFtimestamp = settingsAndStatus.getCurrentEventTimestamp();
                 screenOFFtimestamp = basicHelper.getCleanerTimestamp(screenOFFtimestamp, false);
                 screenOFFtimestamp = screenOFFtimestamp.substring(0, 5); // get only HH:mm
 
 
-                if((screenOFFtimestamp.compareTo(settingsAndStatus.getSmartSleepLogStartReferenceTime()) < 0 ) ||
-                        (settingsAndStatus.getSmartSleepLogEndReferenceTime().compareTo(screenOFFtimestamp ) < 0 )
+                String screenONtimestamp = basicHelper.getCleanerTimestamp(l_currentEventTimestamp, false);
+                screenONtimestamp = screenONtimestamp.substring(0, 5); // get only HH:mm
+
+                Log.d("ScreenStatusService", "screenOFFtimestamp = " + screenOFFtimestamp);
+                Log.d("ScreenStatusService", "screenONtimestamp = " + screenONtimestamp);
+
+                if(basicHelper.isFirstTimeGreaterThanSecondTime(screenOFFtimestamp, screenONtimestamp))
+                    Log.d("ScreenStatusService", "screenOFFtimestamp is greater than screenONtimestamp");
+                else
+                    Log.d("ScreenStatusService", "screenONtimestamp is greater than screenOFFtimestamp");
+
+
+                if( (basicHelper.isFirstTimeGreaterThanSecondTime(screenOFFtimestamp, settingsAndStatus.getSmartSleepLogStartReferenceTime())) ||
+                        (basicHelper.isFirstTimeGreaterThanSecondTime(settingsAndStatus.getSmartSleepLogEndReferenceTime(), screenOFFtimestamp))
+                        //screenOFFtimestamp.compareTo(settingsAndStatus.getSmartSleepLogStartReferenceTime()) < 0 ) ||
+                        //(settingsAndStatus.getSmartSleepLogEndReferenceTime().compareTo(screenOFFtimestamp ) < 0 )
                         ) {
                     //-- screenOFFtimestamp is greater than SmartSleepLogStartReferenceTime or less than
                     //-- screenOFFtimestamp is less than SmartSleepLogEndReferenceTime
                     //-- This means sleep started
 
 
-                    String screenONtimestamp = basicHelper.getCleanerTimestamp(l_currentEventTimestamp, false);
-                    screenONtimestamp = screenONtimestamp.substring(0, 5); // get only HH:mm
-
-
-                    if ((settingsAndStatus.getSmartSleepLogEndReferenceTime().compareTo(screenONtimestamp) < 0)
-                            && (screenONtimestamp.compareTo(settingsAndStatus.getSmartSleepLogStartReferenceTime()) < 0)
+                    if ( (basicHelper.isFirstTimeGreaterThanSecondTime(screenONtimestamp, settingsAndStatus.getSmartSleepLogEndReferenceTime())) &&
+                            (basicHelper.isFirstTimeGreaterThanSecondTime(settingsAndStatus.getSmartSleepLogStartReferenceTime(), screenONtimestamp))
+                            //(settingsAndStatus.getSmartSleepLogEndReferenceTime().compareTo(screenONtimestamp) < 0)
+                            //&& (screenONtimestamp.compareTo(settingsAndStatus.getSmartSleepLogStartReferenceTime()) < 0)
                             ) {
                         //-- screenONtimestamp is greater than SmartSleepLogEndReferenceTime
                         //-- screenONtimestamp is less than SmartSleepLogStartReferenceTime
@@ -255,7 +269,7 @@ public class recordScreenStatusService extends Service {
         }
         else {
             //---------------------------------------------------------------------------------------------------------------------
-            //=====================================================================================================================
+            //===================================================[ OFF ]===========================================================
 
             screenStatusIs = "OFF";
             Log.d("ScreenStatusService", "saveStateChangeInfo : Screen status OFF");
@@ -291,16 +305,20 @@ public class recordScreenStatusService extends Service {
             statusValues.put(ScreenStatisticsDatabaseContract.Table_SettingsAndStatus.COLUMN_LAST_TOTAL_SCREEN_ON_TIME, diffTime);
 
 
-            if(basicHelper.isScreenOnInANewDay(settingsAndStatus.getCurrentEventTimestamp(), settingsAndStatus.getEarlierEventTimestamp())) {
-                Log.d("ScreenStatusService", "saveStateChangeInfo : TotalScreenOnTimeToday was = " + settingsAndStatus.getTotalScreenOnTimeToday());
-                settingsAndStatus.setTotalScreenOnTimeToday(settingsAndStatus.getTotalScreenOnTimeToday() + diffTime);
+
+
+            if(basicHelper.areTheseTimestampsOnTheSameDay(l_currentEventTimestamp, settingsAndStatus.getLastEventTimestamp())) {
+                Log.d("ScreenStatusService", "saveStateChangeInfo : TotalScreenOffTimeToday was = " + settingsAndStatus.getTotalScreenOffTimeToday());
+                settingsAndStatus.setTotalScreenOffTimeToday(settingsAndStatus.getTotalScreenOffTimeToday() + diffTime);
             }
             else {
-                Log.d("ScreenStatusService", "saveStateChangeInfo : TotalScreenOnTimeToday => New day count is reset to 0");
-                settingsAndStatus.setTotalScreenOnTimeToday(diffTime);
+                Log.d("ScreenStatusService", "saveStateChangeInfo : TotalScreenOffTimeToday => New day count is reset to 0");
+                settingsAndStatus.setTotalScreenOffTimeToday(diffTime);
             }
 
-            statusValues.put(ScreenStatisticsDatabaseContract.Table_SettingsAndStatus.COLUMN_SCREEN_ON_TIME_LENGTH_TODAY, settingsAndStatus.getTotalScreenOnTimeToday() );
+            statusValues.put(ScreenStatisticsDatabaseContract.Table_SettingsAndStatus.COLUMN_SCREEN_OFF_TIME_LENGTH_TODAY, settingsAndStatus.getTotalScreenOffTimeToday() );
+
+
         }//---------------------------------------------------------------------------------------------------------------------
 
 
@@ -395,7 +413,6 @@ public class recordScreenStatusService extends Service {
 
 
     }
-
 
 
     private void saveDataToTheFile(){

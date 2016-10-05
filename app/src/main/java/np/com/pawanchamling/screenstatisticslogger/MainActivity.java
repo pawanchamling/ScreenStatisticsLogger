@@ -16,11 +16,7 @@ import android.view.View;
 import android.widget.Chronometer;
 import android.widget.TextView;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Date;
-import java.util.Locale;
 
 import np.com.pawanchamling.screenstatisticslogger.db.MySQLiteHelper;
 import np.com.pawanchamling.screenstatisticslogger.db.ScreenStatisticsDatabaseContract;
@@ -44,7 +40,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         //-- to delete the database that had bad schema
-        this.deleteDatabase("ScreenStatistics.db");
+        //this.deleteDatabase("ScreenStatistics.db");
 
         //
         settingsAndStatus = new Settings();
@@ -317,7 +313,7 @@ public class MainActivity extends AppCompatActivity {
         TextView textView_time_between_screen_off_and_on = (TextView) findViewById(R.id.textView_last_screen_ON_for);
         textView_time_between_screen_off_and_on.setText(diffTotalTimeScreenWasOnStr);
 
-        if(basicHelper.isScreenOnInANewDay(settingsAndStatus.getCurrentEventTimestamp(), settingsAndStatus.getEarlierEventTimestamp())) {
+        if(basicHelper.areTheseTimestampsOnTheSameDay(settingsAndStatus.getCurrentEventTimestamp(), settingsAndStatus.getEarlierEventTimestamp())) {
             Log.d("MainActivity", "updateScreenInfo : TotalScreenOnCountToday  was = " + settingsAndStatus.getTotalScreenOnCountToday());
             settingsAndStatus.setTotalScreenOnCountToday(settingsAndStatus.getTotalScreenOnCountToday() + 1);
 

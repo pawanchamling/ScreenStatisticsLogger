@@ -14,12 +14,17 @@ import java.util.Locale;
 
 public class BasicHelper {
 
-
-    public boolean isScreenOnInANewDay(String currentTimestamp, String lastTimestamp) {
+    /**
+     * To check if this is the same day by comparing the current timestamp with last timestamp
+     * @param currentTimestamp
+     * @param lastTimestamp
+     * @return true if screen is turn ON on the same day
+     */
+    public boolean areTheseTimestampsOnTheSameDay(String currentTimestamp, String lastTimestamp) {
         boolean flag = false;
         if(currentTimestamp != null && lastTimestamp != null) {
-            Log.d("BasicHelper", "isScreenOnInANewDay : currentTimestamp  = " + currentTimestamp);
-            Log.d("BasicHelper", "isScreenOnInANewDay : lastTimestamp  = " + lastTimestamp);
+            Log.d("BasicHelper", "areTheseTimestampsOnTheSameDay : currentTimestamp  = " + currentTimestamp);
+            Log.d("BasicHelper", "areTheseTimestampsOnTheSameDay : lastTimestamp  = " + lastTimestamp);
 
             SimpleDateFormat dateFormat0 = new SimpleDateFormat("EE MMM dd HH:mm:ss z yyyy", Locale.ENGLISH);
             try {
@@ -35,15 +40,15 @@ public class BasicHelper {
                 c1.setTime(date2);
                 int lastDay = c1.get(c1.DAY_OF_MONTH);
 
-                Log.d("BasicHelper", "isScreenOnInANewDay : current : day of the month " + currentDay );
-                Log.d("BasicHelper", "isScreenOnInANewDay : last    : day of the month " + lastDay );
+                Log.d("BasicHelper", "areTheseTimestampsOnTheSameDay : current : day of the month " + currentDay );
+                Log.d("BasicHelper", "areTheseTimestampsOnTheSameDay : last    : day of the month " + lastDay );
 
                 if(currentDay == lastDay) {
                     flag = true;
-                    Log.d("BasicHelper", "isScreenOnInANewDay : Screen is turned ON on the same day" );
+                    Log.d("BasicHelper", "areTheseTimestampsOnTheSameDay : Screen is turned ON on the same day" );
                 }
                 else {
-                    Log.d("BasicHelper", "isScreenOnInANewDay : Screen is turned ON on the other day" );
+                    Log.d("BasicHelper", "areTheseTimestampsOnTheSameDay : Screen is turned ON on the other day" );
                 }
 
             }
@@ -53,7 +58,7 @@ public class BasicHelper {
 
         }
         else {
-            Log.d("isScreenOnInANewDay", "currentTimestamp or lastTimestamp is null" );
+            Log.d("BasicHelper", "areTheseTimestampsOnTheSameDay : currentTimestamp or lastTimestamp is null" );
         }
 
 
@@ -62,15 +67,14 @@ public class BasicHelper {
     }
 
 
-
-/*
-* String timestamp, boolean includeDate
- * if includeDate is false, returns timestamp in HH:mm:ss format
- * if includeDate is true, returns timestamp in HH:mm:ss (yyyy-MM-dd) format
- */
+    /**
+     * String timestamp, boolean includeDate
+     * if includeDate is false, returns timestamp in HH:mm:ss format
+     * if includeDate is true, returns timestamp in HH:mm:ss (yyyy-MM-dd) format
+     */
     public String getCleanerTimestamp(String timestamp, boolean includeDate) {
 
-        Log.d("MainActivity", "cleaner Timestamp for  = " + timestamp);
+        Log.d("BasicHelper", "cleaner Timestamp for  = " + timestamp);
         String cleanTimestamp = "--|--";
 
         if(timestamp != null && !timestamp.equals("--|--") ) {
@@ -137,10 +141,56 @@ public class BasicHelper {
             diffTimeStr = (diffTime/3600000) + hoursStr + "s & "+ minutes/60000 + minutesStr + "s";
         }
 
-        Log.d("MainActivity", "getVerboseTime: diffTime = " + diffTime + " -> " + diffTimeStr);
+        Log.d("BasicHelper", "getVerboseTime: diffTime = " + diffTime + " -> " + diffTimeStr);
 
         return diffTimeStr;
     }
+
+
+    /**
+     * To check if the first time is greater than the second time (both time in HH:mm format)
+     * @param firstTime the time that is compared
+     * @param secondTime the second time that is the reference for the comparison
+     * @return true if firstTime is greater than secondTime
+     */
+    public boolean isFirstTimeGreaterThanSecondTime(String firstTime, String secondTime) {
+
+        Log.d("BasicHelper", "isFirstTimeGreaterThanSecondTime: firstTime = " + firstTime + ", secondTime = " + secondTime);
+
+
+        int firstTimeInt = 0;
+        int secondTimeInt = 0;
+        if(firstTime.length() == 5)
+            firstTimeInt = Integer.parseInt(firstTime.substring(0,2) + firstTime.substring(3, 5));
+        if(secondTime.length() == 5)
+            secondTimeInt = Integer.parseInt(secondTime.substring(0,2) + secondTime.substring(3, 5));
+
+
+        Log.d("BasicHelper", "isFirstTimeGreaterThanSecondTime: firstTimeInt = " + firstTimeInt + ", secondTimeInt = " + secondTimeInt);
+        if(firstTimeInt >= secondTimeInt)
+            return true;
+        else
+            return false;
+    }
+
+
+    /**
+     * Get the total time in Milliseconds for today
+     * like if timestamp is
+     * @param timestamp
+     * @return
+     */
+    public long getTotalTimeInMillisForToday(String timestamp) {
+        long timeIs = 0;
+
+
+        return timeIs;
+
+    }
+
+
+
+
 
 
 }
