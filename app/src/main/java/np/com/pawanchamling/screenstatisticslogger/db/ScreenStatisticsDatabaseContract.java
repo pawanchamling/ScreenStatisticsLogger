@@ -18,6 +18,7 @@ public class ScreenStatisticsDatabaseContract {
     // make the constructor private.
     private ScreenStatisticsDatabaseContract() {}
 
+
     /* Inner class that defines the table contents - all the records regarding Screen Statistics */
     public static class Table_ScreenStats implements BaseColumns {
         public static final String TABLE_NAME                   = "ScreenStatistics";
@@ -39,6 +40,10 @@ public class ScreenStatisticsDatabaseContract {
     }
 
 
+
+
+
+
     //-- To keeps the settings info
     public static class Table_SettingsAndStatus implements BaseColumns {
         public static final String TABLE_NAME                           = "Settings";
@@ -51,10 +56,13 @@ public class ScreenStatisticsDatabaseContract {
         public static final String COLUMN_LAST_SCREEN_ON_TIMESTAMP      = "last_screen_on_timestamp";
         public static final String COLUMN_LAST_SCREEN_OFF_TIMESTAMP     = "last_screen_off_timestamp";
         public static final String COLUMN_LAST_TOTAL_SCREEN_ON_TIME     = "total_screen_on_time";
-        public static final String COLUMN_LAST_TOTAL_SCREEN_OFF_TIME    = "smart_screen_off_time";
+        public static final String COLUMN_LAST_TOTAL_SCREEN_OFF_TIME    = "total_screen_off_time";
         public static final String COLUMN_SCREEN_ON_COUNT_TODAY         = "screen_on_count_today";
         public static final String COLUMN_SCREEN_ON_TIME_LENGTH_TODAY   = "screen_on_time_length_today";
         public static final String COLUMN_SCREEN_OFF_TIME_LENGTH_TODAY  = "screen_off_time_length_today";
+        public static final String COLUMN_CURRENT_EVENT_TIMESTAMP       = "current_event_timestamp";
+        public static final String COLUMN_LAST_EVENT_TIMESTAMP          = "last_event_timestamp";
+        public static final String COLUMN_EARLIER_EVENT_TIMESTAMP       = "earlier_event_timestamp";
 
         public static final String CREATE_TABLE = "CREATE TABLE " +
                 TABLE_NAME + " (" +
@@ -71,7 +79,10 @@ public class ScreenStatisticsDatabaseContract {
                 COLUMN_LAST_TOTAL_SCREEN_OFF_TIME   + TYPE_INTEGER      + COMMA_SEP +
                 COLUMN_SCREEN_ON_COUNT_TODAY        + TYPE_INTEGER      + COMMA_SEP +
                 COLUMN_SCREEN_ON_TIME_LENGTH_TODAY  + TYPE_INTEGER      + COMMA_SEP +
-                COLUMN_SCREEN_OFF_TIME_LENGTH_TODAY + TYPE_INTEGER      +
+                COLUMN_SCREEN_OFF_TIME_LENGTH_TODAY + TYPE_INTEGER      + COMMA_SEP +
+                COLUMN_CURRENT_EVENT_TIMESTAMP      + TYPE_TEXT         + COMMA_SEP +
+                COLUMN_LAST_EVENT_TIMESTAMP         + TYPE_TEXT         + COMMA_SEP +
+                COLUMN_EARLIER_EVENT_TIMESTAMP      + TYPE_TEXT         +
                 ")";
 
         public static final String DELETE_TABLE = "DROP TABLE IF EXISTS " + TABLE_NAME;
@@ -89,11 +100,23 @@ public class ScreenStatisticsDatabaseContract {
                 COLUMN_LAST_TOTAL_SCREEN_OFF_TIME   + COMMA_SEP +
                 COLUMN_SCREEN_ON_COUNT_TODAY        + COMMA_SEP +
                 COLUMN_SCREEN_ON_TIME_LENGTH_TODAY  + COMMA_SEP +
-                COLUMN_SCREEN_OFF_TIME_LENGTH_TODAY +
-                ") VALUES(0,0,1, '21:00', '05:00', 0, '--:--', '--|--', 0, 0, 0, 0, 0 )"; // 0 = false, 1 = true for boolean types
+                COLUMN_SCREEN_OFF_TIME_LENGTH_TODAY + COMMA_SEP +
+                COLUMN_CURRENT_EVENT_TIMESTAMP      + COMMA_SEP +
+                COLUMN_LAST_EVENT_TIMESTAMP         + COMMA_SEP +
+                COLUMN_EARLIER_EVENT_TIMESTAMP      +
+                ") VALUES(0,0,1, '21:00', '05:00', 0, '--:--', '--:--', 0, 0, 0, 0, 0, '', '', '' )"; // 0 = false, 1 = true for boolean types
 
         public static final String SELECT_DESC = "SELECT * FROM " + TABLE_NAME + " ORDER BY " + _ID + " DESC";
     }
+
+
+
+
+
+
+
+
+
 
     //-- To keep Smart Sleep Logs or Records
     public static class Table_SmartSleepLog implements BaseColumns {
@@ -118,5 +141,14 @@ public class ScreenStatisticsDatabaseContract {
 
         public static final String SELECT_DESC = "SELECT * FROM " + TABLE_NAME + " ORDER BY " + _ID + " DESC";
     }
+
+
+
+
+
+
+
+
+
 
 }

@@ -55,6 +55,7 @@ public class MainActivity extends AppCompatActivity {
         db = mDbHelper.getWritableDatabase();
 
 
+        //-- The chronometer showing the time past since last screen-ON event ---------------
         screenONtimer = (Chronometer) findViewById(R.id.screenOnTimeChronometer);
         screenONtimer.setOnChronometerTickListener(new Chronometer.OnChronometerTickListener(){
             @Override
@@ -76,7 +77,7 @@ public class MainActivity extends AppCompatActivity {
         getSettingsFromDB();
         getStatusFromDB();
 
-        updateScreenInfo();
+        //updateScreenInfo();
 
         Log.d("MainActivity","About to start the service");
 
@@ -110,6 +111,21 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
+
+
+    @Override
+    protected void onResume(){
+        super.onResume();
+
+        Log.d("MainActivity", "onResume");
+
+        getSettingsFromDB();
+        updateScreenInfo();
+
+
+    }
+
+
     // Our handler for received Intents. This will be called whenever an Intent
     // with an action named "screenIsOnBroadcast" is broadcasted.
     private BroadcastReceiver screenOnEventMessageReceiver = new BroadcastReceiver() {
@@ -125,6 +141,8 @@ public class MainActivity extends AppCompatActivity {
                 Log.d("MainActivity", "Updating UI ");
                 updateScreenInfo();
 
+
+
                 screenONtimer.setFormat("H:MM:SS");
                 screenONtimer.start();
             }
@@ -132,7 +150,7 @@ public class MainActivity extends AppCompatActivity {
     };
 
     // Our handler for received Intents. This will be called whenever an Intent
-    // with an action named "screenIsOnBroadcast" is broadcasted.
+    // with an action named "screenIsOffBroadcast" is broadcasted.
     private BroadcastReceiver screenOffEventMessageReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -166,9 +184,9 @@ public class MainActivity extends AppCompatActivity {
 
             Calendar cal = Calendar.getInstance();
             String newCurrentTimestamp = cal.getTime().toString();
-            settingsAndStatus.setCurrentEventTimestamp(newCurrentTimestamp);
-            settingsAndStatus.setLastEventTimestamp(newCurrentTimestamp);
-            settingsAndStatus.setEarlierEventTimestamp(newCurrentTimestamp);
+//            settingsAndStatus.setCurrentEventTimestamp(newCurrentTimestamp);
+//            settingsAndStatus.setLastEventTimestamp(newCurrentTimestamp);
+//            settingsAndStatus.setEarlierEventTimestamp(newCurrentTimestamp);
         }
         else {
             Log.d("MainActivity", "getSettingsFromDB : SettingsInfo table has data in it");
@@ -185,54 +203,153 @@ public class MainActivity extends AppCompatActivity {
                 settingsAndStatus.setSmartSleepLogStartReferenceTime(c.getString(4));
                 settingsAndStatus.setSmartSleepLogEndReferenceTime(c.getString(5));
                 settingsAndStatus.setSmartSleepLogOffsetValue(c.getInt(6));
+
                 settingsAndStatus.setLastScreenOnTimestamp(c.getString(7));
                 settingsAndStatus.setLastScreenOffTimestamp(c.getString(8));
+
                 settingsAndStatus.setTotalTimeScreenWasOn(c.getInt(9));
                 settingsAndStatus.setTotalTimeScreenWasOff(c.getInt(10));
                 settingsAndStatus.setTotalScreenOnCountToday(c.getInt(11));
                 settingsAndStatus.setTotalScreenOnTimeToday(c.getInt(12));
                 settingsAndStatus.setTotalScreenOffTimeToday(c.getInt(13));
 
+                settingsAndStatus.setCurrentEventTimestamp(c.getString(14));
+                settingsAndStatus.setLastEventTimestamp(c.getString(15));
+                settingsAndStatus.setEarlierEventTimestamp(c.getString(16));
+
 
                 //-- Just checking if the values are set in properly or not
 
                 if (settingsAndStatus.isRecordingState())
-                    Log.d("RecordingState", "true");
+                    Log.d("MainActivity", "getSettingsFromDB : RecordingState = true");
                 else
-                    Log.d("RecordingState", "false");
+                    Log.d("MainActivity", "getSettingsFromDB : RecordingState = false");
 
 
                 if (settingsAndStatus.isSmartAlarmState())
-                    Log.d("SmartAlarmState", "true");
+                    Log.d("MainActivity", "getSettingsFromDB : SmartAlarmState = true");
                 else
-                    Log.d("SmartAlarmState", "false");
+                    Log.d("MainActivity", "getSettingsFromDB : SmartAlarmState = false");
 
 
                 if (settingsAndStatus.isSmartSleepLogState())
-                    Log.d("SmartSleepLogState", "true");
+                    Log.d("MainActivity", "getSettingsFromDB : SmartSleepLogState = true");
                 else
-                    Log.d("SmartSleepLogState", "false");
+                    Log.d("MainActivity", "getSettingsFromDB : SmartSleepLogState = false");
 
-                Log.d("SleepStartReferenceTime", settingsAndStatus.getSmartSleepLogStartReferenceTime());
-                Log.d("SleepStopReferenceTime", settingsAndStatus.getSmartSleepLogEndReferenceTime());
-                Log.d("SleepOffsetTime", "" + settingsAndStatus.getSmartSleepLogOffsetValue());
-                Log.d("LastScreenOnTime", "" + settingsAndStatus.getLastScreenOnTimestamp());
-                Log.d("LastScreenOffTime", "" + settingsAndStatus.getLastScreenOffTimestamp());
-                Log.d("LastTotalScreenOnTime", "" + settingsAndStatus.getTotalTimeScreenWasOn());
-                Log.d("LastTotalScreenOffTime", "" + settingsAndStatus.getTotalTimeScreenWasOff());
-                Log.d("TotalScreenOnCountToday", "" + settingsAndStatus.getTotalScreenOnCountToday());
-                Log.d("TotalScreenOnTimeToday", "" + settingsAndStatus.getTotalScreenOnTimeToday());
-                Log.d("TotalScreenOffTimeToday", "" + settingsAndStatus.getTotalScreenOffTimeToday());
+                Log.d("MainActivity", "getSettingsFromDB : SleepStartReferenceTime = " +  settingsAndStatus.getSmartSleepLogStartReferenceTime());
+                Log.d("MainActivity", "getSettingsFromDB : SleepStopReferenceTime  = " + settingsAndStatus.getSmartSleepLogEndReferenceTime());
+                Log.d("MainActivity", "getSettingsFromDB : SleepOffsetTime = " + settingsAndStatus.getSmartSleepLogOffsetValue());
+                Log.d("MainActivity", "getSettingsFromDB : LastScreenOnTime  = " + settingsAndStatus.getLastScreenOnTimestamp());
+                Log.d("MainActivity", "getSettingsFromDB : LastScreenOffTime = " + settingsAndStatus.getLastScreenOffTimestamp());
+                Log.d("MainActivity", "getSettingsFromDB : LastTotalScreenOnTime  = " + settingsAndStatus.getTotalTimeScreenWasOn());
+                Log.d("MainActivity", "getSettingsFromDB : LastTotalScreenOffTime = " + settingsAndStatus.getTotalTimeScreenWasOff());
+                Log.d("MainActivity", "getSettingsFromDB : TotalScreenOnCountToday  = " + settingsAndStatus.getTotalScreenOnCountToday());
+                Log.d("MainActivity", "getSettingsFromDB : TotalScreenOnTimeToday   = " + settingsAndStatus.getTotalScreenOnTimeToday());
+                Log.d("MainActivity", "getSettingsFromDB : TotalScreenOffTimeToday  = " + settingsAndStatus.getTotalScreenOffTimeToday());
 
-                Log.d("CurrentEventTimestamp", "" + settingsAndStatus.getCurrentEventTimestamp());
-                Log.d("LastEventTimestamp", "" + settingsAndStatus.getLastEventTimestamp());
-                Log.d("EarlierEventTimestamp", "" + settingsAndStatus.getEarlierEventTimestamp());
+                //settingsAndStatus.get
+
+                Log.d("MainActivity", "getSettingsFromDB : CurrentEventTimestamp    = " + settingsAndStatus.getCurrentEventTimestamp());
+                Log.d("MainActivity", "getSettingsFromDB : LastEventTimestamp       = " + settingsAndStatus.getLastEventTimestamp());
+                Log.d("MainActivity", "getSettingsFromDB : EarlierEventTimestamp    = " + settingsAndStatus.getEarlierEventTimestamp());
+
+//                if(settingsAndStatus.getCurrentEventTimestamp() == null) {
+//                    settingsAndStatus.setCurrentEventTimestamp();
+//                }
+//
+//                if(settingsAndStatus.getLastEventTimestamp() == null) {
+//                    settingsAndStatus.setLastEventTimestamp();
+//                }
+//
+//                if(settingsAndStatus.getEarlierEventTimestamp() == null) {
+//                    settingsAndStatus.setEarlierEventTimestamp();
+//                }
+
 
             }
         }
         finally {
             c.close();
         }
+
+
+
+
+
+
+        //setLastScreenOnTimestamp
+        Cursor c_LastScreenOnTimestamp = db.rawQuery("SELECT * FROM " + ScreenStatisticsDatabaseContract.Table_ScreenStats.TABLE_NAME + " WHERE "
+                        + ScreenStatisticsDatabaseContract.Table_ScreenStats.COLUMN_NAME_SCREEN_STATUS + "='ON' ORDER BY "
+                        + ScreenStatisticsDatabaseContract.Table_ScreenStats.COLUMN_NAME_TIMESTAMP + " DESC LIMIT 2"
+                , null);
+        try {
+
+            //-- the cursor starts 'before' the first result row, so on the first iteration this moves
+            //-- to the first result 'if it exists'.
+            while(c_LastScreenOnTimestamp.moveToNext()) {
+                Log.d("MainActivity", "getSettingsFromDB : ScreenStats ON : Timestamp " +  c_LastScreenOnTimestamp.getString(1) );
+                settingsAndStatus.setLastScreenOnTimestamp(c_LastScreenOnTimestamp.getString(1));
+            }
+
+        }
+        finally {
+            c_LastScreenOnTimestamp.close();
+        }
+
+
+
+        Cursor c_LastScreenOffTimestamp = db.rawQuery("SELECT * FROM " + ScreenStatisticsDatabaseContract.Table_ScreenStats.TABLE_NAME + " WHERE "
+                        + ScreenStatisticsDatabaseContract.Table_ScreenStats.COLUMN_NAME_SCREEN_STATUS + "='OFF' ORDER BY "
+                        + ScreenStatisticsDatabaseContract.Table_ScreenStats.COLUMN_NAME_TIMESTAMP + " DESC LIMIT 1"
+                , null);
+        try {
+
+            //-- the cursor starts 'before' the first result row, so on the first iteration this moves
+            //-- to the first result 'if it exists'.
+            while(c_LastScreenOffTimestamp.moveToNext()) {
+                Log.d("MainActivity", "getSettingsFromDB : ScreenStats OFF : Timestamp " +  c_LastScreenOffTimestamp.getString(1) );
+                settingsAndStatus.setLastScreenOnTimestamp(c_LastScreenOffTimestamp.getString(1));
+            }
+
+        }
+        finally {
+            c_LastScreenOffTimestamp.close();
+        }
+
+
+        Cursor c_timestamps = db.rawQuery("SELECT * FROM " + ScreenStatisticsDatabaseContract.Table_ScreenStats.TABLE_NAME
+                + " ORDER BY " + ScreenStatisticsDatabaseContract.Table_ScreenStats.COLUMN_NAME_TIMESTAMP + " DESC LIMIT 3"
+                , null);
+        try {
+
+            //-- the cursor starts 'before' the first result row, so on the first iteration this moves
+            //-- to the first result 'if it exists'.
+            int flag = 1;
+            while(c_timestamps.moveToNext()) {
+                if(flag == 1) {
+                    settingsAndStatus.setCurrentEventTimestamp(c_timestamps.getString(1));
+                    Log.d("MainActivity", "getSettingsFromDB : CurrentEventTimestamp : " +  c_timestamps.getString(1) );
+                }
+                else if(flag == 2) {
+                    settingsAndStatus.setLastEventTimestamp(c_timestamps.getString(1));
+                    Log.d("MainActivity", "getSettingsFromDB : LastEventTimestamp    : " +  c_timestamps.getString(1) );
+                }
+                else if(flag == 3) {
+                    settingsAndStatus.setEarlierEventTimestamp(c_timestamps.getString(1));
+                    Log.d("MainActivity", "getSettingsFromDB : EarlierEventTimestamp : " +  c_timestamps.getString(1) );
+                }
+
+                flag++;
+            }
+
+        }
+        finally {
+            c_timestamps.close();
+        }
+
+
+
 
     }
 
@@ -243,15 +360,15 @@ public class MainActivity extends AppCompatActivity {
                 null);
 
         if(c.getCount() == 0) {
-            Log.d("MainActivity", "no data in the Settings: insert default values");
+            Log.d("MainActivity", "getStatusFromDB() : no data in the Settings: insert default values");
             db.execSQL(ScreenStatisticsDatabaseContract.Table_SettingsAndStatus.INSERT_DEFAULT);
             c = db.rawQuery("SELECT * FROM " + ScreenStatisticsDatabaseContract.Table_SettingsAndStatus.TABLE_NAME,
                     null);
 
-            Log.d("MainActivity", "Now SettingsInfo table have " + c.getCount() + " row");
+            Log.d("MainActivity", "getStatusFromDB() : Now SettingsInfo table have " + c.getCount() + " row");
         }
         else {
-            Log.d("MainActivity", "SettingsInfo table has data in it");
+            Log.d("MainActivity", "getStatusFromDB() : SettingsInfo table has data in it");
         }
 
         try {
@@ -269,19 +386,6 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-
-
-    @Override
-    protected void onResume(){
-        super.onResume();
-
-        Log.d("MainActivity", "onResume");
-
-        getSettingsFromDB();
-        updateScreenInfo();
-
-
-    }
 
 
 
@@ -337,6 +441,13 @@ public class MainActivity extends AppCompatActivity {
 
         TextView textView_total_screen_OFF_time_today_value = (TextView) findViewById(R.id.textView_total_screen_OFF_time_today_value);
         textView_total_screen_OFF_time_today_value.setText(basicHelper.getVerboseTime(settingsAndStatus.getTotalScreenOffTimeToday(), true));
+
+
+
+
+        TextView textView_currentScreenONtime = (TextView) findViewById(R.id.textView_currentScreenONtime);
+        textView_currentScreenONtime.setText(basicHelper.getCleanerTimestamp(settingsAndStatus.getCurrentEventTimestamp(), true));
+
     }
 
 

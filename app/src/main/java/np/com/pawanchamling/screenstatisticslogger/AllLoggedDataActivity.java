@@ -64,9 +64,9 @@ public class AllLoggedDataActivity extends AppCompatActivity {
                     String screenStatus = c.getString(2);
                     Long diffValue = c.getLong(3);
 
-                    Log.d("AllLoggedDataActivity", "onResume : timestamp = " + timestamp);
+                    Log.d("AllLoggedDataActivity", "onResume : timestamp    = " + timestamp);
                     Log.d("AllLoggedDataActivity", "onResume : screenStatus = " + screenStatus);
-                    Log.d("AllLoggedDataActivity", "onResume : diffValue = " + diffValue);
+                    Log.d("AllLoggedDataActivity", "onResume : diffValue    = " + diffValue);
 
                     //TextView col_timestamp = ((TextView) row.findViewById(R.id.col_timestamp));
                     ((TextView) row.findViewById(R.id.col_timestamp)).setText(basicHelper.getCleanerTimestamp(timestamp, true));

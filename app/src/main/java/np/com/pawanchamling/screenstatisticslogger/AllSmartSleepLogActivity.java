@@ -69,10 +69,10 @@ public class AllSmartSleepLogActivity extends AppCompatActivity {
 
 
                     Log.d("AllSmartSleepLog", "onResume : start timestamp = " + startTimestamp);
-                    Log.d("AllSmartSleepLog", "onResume : stop timestamp = " + stopTimestamp);
-                    Log.d("AllSmartSleepLog", "onResume : total length = " + totalLength);
-                    Log.d("AllSmartSleepLog", "onResume : total sleep = " + totalSleep);
-                    Log.d("AllSmartSleepLog", "onResume : sleep offset = " + sleepOffset);
+                    Log.d("AllSmartSleepLog", "onResume : stop timestamp  = " + stopTimestamp);
+                    Log.d("AllSmartSleepLog", "onResume : total length    = " + totalLength);
+                    Log.d("AllSmartSleepLog", "onResume : total sleep     = " + totalSleep);
+                    Log.d("AllSmartSleepLog", "onResume : sleep offset    = " + sleepOffset);
 
                     //TextView col_timestamp = ((TextView) row.findViewById(R.id.col_timestamp));
                     ((TextView) row.findViewById(R.id.col_sleep_start)).setText(basicHelper.getCleanerTimestamp(startTimestamp, true));

@@ -22,33 +22,35 @@ public class BasicHelper {
      */
     public boolean areTheseTimestampsOnTheSameDay(String currentTimestamp, String lastTimestamp) {
         boolean flag = false;
-        if(currentTimestamp != null && lastTimestamp != null) {
+        if((currentTimestamp != null && lastTimestamp != null) &&
+                (!currentTimestamp.equals("--:--") && !lastTimestamp.equals("--:--"))
+                ) {
             Log.d("BasicHelper", "areTheseTimestampsOnTheSameDay : currentTimestamp  = " + currentTimestamp);
             Log.d("BasicHelper", "areTheseTimestampsOnTheSameDay : lastTimestamp  = " + lastTimestamp);
 
             SimpleDateFormat dateFormat0 = new SimpleDateFormat("EE MMM dd HH:mm:ss z yyyy", Locale.ENGLISH);
             try {
                 //currentTimestamp = "Sun Oct 01 15:33:53 GMT+02:00 2016";
+                if(currentTimestamp != null && !currentTimestamp.equals("") && lastTimestamp != null && !lastTimestamp.equals("")) {
+                    Date date1 = dateFormat0.parse(currentTimestamp);
+                    Calendar c0 = Calendar.getInstance();
+                    c0.setTime(date1);
+                    int currentDay = c0.get(c0.DAY_OF_MONTH);
 
-                Date date1 = dateFormat0.parse(currentTimestamp);
-                Calendar c0 = Calendar.getInstance();
-                c0.setTime(date1);
-                int currentDay = c0.get(c0.DAY_OF_MONTH);
+                    Date date2 = dateFormat0.parse(lastTimestamp);
+                    Calendar c1 = Calendar.getInstance();
+                    c1.setTime(date2);
+                    int lastDay = c1.get(c1.DAY_OF_MONTH);
 
-                Date date2 = dateFormat0.parse(lastTimestamp);
-                Calendar c1 = Calendar.getInstance();
-                c1.setTime(date2);
-                int lastDay = c1.get(c1.DAY_OF_MONTH);
+                    Log.d("BasicHelper", "areTheseTimestampsOnTheSameDay : current : day of the month " + currentDay);
+                    Log.d("BasicHelper", "areTheseTimestampsOnTheSameDay : last    : day of the month " + lastDay);
 
-                Log.d("BasicHelper", "areTheseTimestampsOnTheSameDay : current : day of the month " + currentDay );
-                Log.d("BasicHelper", "areTheseTimestampsOnTheSameDay : last    : day of the month " + lastDay );
-
-                if(currentDay == lastDay) {
-                    flag = true;
-                    Log.d("BasicHelper", "areTheseTimestampsOnTheSameDay : Screen is turned ON on the same day" );
-                }
-                else {
-                    Log.d("BasicHelper", "areTheseTimestampsOnTheSameDay : Screen is turned ON on the other day" );
+                    if (currentDay == lastDay) {
+                        flag = true;
+                        Log.d("BasicHelper", "areTheseTimestampsOnTheSameDay : Screen is turned ON on the same day");
+                    } else {
+                        Log.d("BasicHelper", "areTheseTimestampsOnTheSameDay : Screen is turned ON on the other day");
+                    }
                 }
 
             }
@@ -75,9 +77,9 @@ public class BasicHelper {
     public String getCleanerTimestamp(String timestamp, boolean includeDate) {
 
         Log.d("BasicHelper", "cleaner Timestamp for  = " + timestamp);
-        String cleanTimestamp = "--|--";
+        String cleanTimestamp = "--:--";
 
-        if(timestamp != null && !timestamp.equals("--|--") ) {
+        if(timestamp != null && !timestamp.equals("--:--") && !timestamp.equals("") ) {
             SimpleDateFormat dateFormat0 = new SimpleDateFormat("EE MMM dd HH:mm:ss z yyyy", Locale.ENGLISH);
             SimpleDateFormat dateFormat1 = new SimpleDateFormat("HH:mm:ss");
             SimpleDateFormat dateFormat2 = new SimpleDateFormat("yyyy-MM-dd");
@@ -160,9 +162,9 @@ public class BasicHelper {
 
         int firstTimeInt = 0;
         int secondTimeInt = 0;
-        if(firstTime.length() == 5)
+        if(firstTime.length() == 5 && !firstTime.equals("--:--"))
             firstTimeInt = Integer.parseInt(firstTime.substring(0,2) + firstTime.substring(3, 5));
-        if(secondTime.length() == 5)
+        if(secondTime.length() == 5 && !secondTime.equals("--:--"))
             secondTimeInt = Integer.parseInt(secondTime.substring(0,2) + secondTime.substring(3, 5));
 
 

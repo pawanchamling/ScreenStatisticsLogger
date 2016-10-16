@@ -141,9 +141,15 @@ public class recordScreenStatusService extends Service {
             screenStatusIs = "ON";
             Log.d("ScreenStatusService", "saveStateChangeInfo : Screen status ON");
 
+            if(settingsAndStatus.getCurrentEventTimestamp() == null || settingsAndStatus.getCurrentEventTimestamp().equals(""))
+                if (settingsAndStatus.getLastScreenOffTimestamp() != null && !settingsAndStatus.getLastScreenOffTimestamp().equals("--:--"))
+                    settingsAndStatus.setCurrentEventTimestamp(settingsAndStatus.getLastScreenOffTimestamp());
+                else
+                    settingsAndStatus.setCurrentEventTimestamp(l_currentEventTimestamp);
 
             l_lastEventTimestamp = settingsAndStatus.getCurrentEventTimestamp();
-            if(l_lastEventTimestamp == null || l_lastEventTimestamp.equals("--|--")) {
+
+            if(l_lastEventTimestamp == null || l_lastEventTimestamp.equals("--:--")) {
                 diffTime = 0;
             }
             else {
@@ -161,6 +167,15 @@ public class recordScreenStatusService extends Service {
 
                 diffTime = l_currentTimestampInMilliseconds - l_lastTimestampInMilliseconds;
             }
+
+
+
+            if(settingsAndStatus.getLastEventTimestamp() == null || settingsAndStatus.getLastEventTimestamp().equals(""))
+                if (settingsAndStatus.getLastScreenOnTimestamp() != null && !settingsAndStatus.getLastScreenOnTimestamp().equals("--:--"))
+                    settingsAndStatus.setLastEventTimestamp(settingsAndStatus.getLastScreenOnTimestamp());
+                else
+                    settingsAndStatus.setLastEventTimestamp(l_currentEventTimestamp);
+
 
 
             settingsAndStatus.setLastScreenOnTimestamp(settingsAndStatus.getLastEventTimestamp());
@@ -274,10 +289,11 @@ public class recordScreenStatusService extends Service {
             screenStatusIs = "OFF";
             Log.d("ScreenStatusService", "saveStateChangeInfo : Screen status OFF");
 
+
             l_lastEventTimestamp = settingsAndStatus.getCurrentEventTimestamp();
             Log.d("ScreenStatusService", "saveStateChangeInfo : lastTimestamp = " + l_lastEventTimestamp);
 
-            if(l_lastEventTimestamp == null || l_lastEventTimestamp.equals("--|--")) {
+            if(l_lastEventTimestamp == null || l_lastEventTimestamp.equals("--:--") || !l_lastEventTimestamp.equals("")) {
                 diffTime = 0;
             }
             else {
@@ -331,6 +347,10 @@ public class recordScreenStatusService extends Service {
         settingsAndStatus.setLastEventTimestamp(settingsAndStatus.getCurrentEventTimestamp());
         settingsAndStatus.setCurrentEventTimestamp(l_currentEventTimestamp);
 
+        statusValues.put(ScreenStatisticsDatabaseContract.Table_SettingsAndStatus.COLUMN_CURRENT_EVENT_TIMESTAMP, settingsAndStatus.getCurrentEventTimestamp() );
+        statusValues.put(ScreenStatisticsDatabaseContract.Table_SettingsAndStatus.COLUMN_LAST_EVENT_TIMESTAMP, settingsAndStatus.getLastEventTimestamp() );
+        statusValues.put(ScreenStatisticsDatabaseContract.Table_SettingsAndStatus.COLUMN_EARLIER_EVENT_TIMESTAMP, settingsAndStatus.getEarlierEventTimestamp() );
+
 
         Log.d("ScreenStatusService", "saveStateChangeInfo : diff = " + diffTime);
 
@@ -359,7 +379,7 @@ public class recordScreenStatusService extends Service {
 
 
 
-        //-- Settinga and Status ---------------------
+        //-- Settings and Status ---------------------
 
         int updatedRow = db.update(ScreenStatisticsDatabaseContract.Table_SettingsAndStatus.TABLE_NAME, statusValues, "_id=1", null);
         Log.d("ScreenStatusService", "saveStateChangeInfo : row updated in table " +
